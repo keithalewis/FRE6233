@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="xll_template.cpp">
+    <ClCompile Include="xll_option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="xll_template.h">
+    <ClInclude Include="bsm_option.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
-// xll_template.h - common includes
+// bsm_option.h - Black-Scholes/Merton option value and greeks
 #pragma once
-#include <cmath> // erf
+#include <cmath>
 #include <limits>
 #include "xll/xll/xll.h"
 
@@ -8,17 +8,18 @@
 #define CATEGORY "FRE6233"
 #endif
 
-namespace FRE6233 {
+namespace bsm {
 
 	// Return NaN to indicate error.
 	constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
 	// sqrt(2 pi)
 	constexpr double M_SQRT2PI = 2.50662827463100050240;
-	//#ifndef M_SQRT2
+#ifndef M_SQRT2
 	// sqrt(2)
 	constexpr double M_SQRT2 = 1.41421356237309504880;
-	//#endif
+#endif
 
+	// standard normal random variate
 	namespace normal {
 
 		// P(X <= x) and derivatives
@@ -27,7 +28,9 @@ namespace FRE6233 {
 			if (n == 0) {
 				return  (1 + ::erf(x / M_SQRT2)) / 2;
 			}
+
 			double phi = ::exp(-x * x / 2) / M_SQRT2PI;
+			
 			if (n == 1) {
 				return phi;
 			}
@@ -59,6 +62,8 @@ namespace FRE6233 {
 	}
 
 	namespace option {
+
+		//  moneyness
 		inline double moneyness(double f, double s, double k)
 		{
 			if (f <= 0 || s <= 0 || k <= 0) {
@@ -68,20 +73,32 @@ namespace FRE6233 {
 			return (log(k / f) + normal::cumulant(s)) / s;
 		}
 
-		// put option value
+		// put (k < 0) or call (k > 0) option value
 		inline double value(double f, double s, double k)
 		{
-			double m = moneyness(f, s, k);
+			if (k < 0) { // put
+				double m = moneyness(f, s, -k);
 
-			return k * normal::cdf(m) - f * normal::cdf(m, s);
+				return (-k) * normal::cdf(m) - f * normal::cdf(m, s);
+			}
+			else { // call
+				// c = p + f - k
+				return option::value(f, s, -k) + f - k;
+			}
 		}
 
-		// put option delta
+		// put (k < 0) or call (k > 0) option delta
 		inline double delta(double f, double s, double k)
 		{
-			double m = moneyness(f, s, k);
+			if (k < 0) { // put
+				double m = moneyness(f, s, -k);
 
-			return -normal::cdf(m, s);
+				return -normal::cdf(m, s);
+			}
+			else { // call
+				// dc/df = dp/df + 1
+				return option::delta(f, s, -k) + 1;
+			}
 		}
 
 	}

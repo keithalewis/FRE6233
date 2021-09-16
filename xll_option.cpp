@@ -1,8 +1,8 @@
-﻿// xll_template.cpp - Sample xll project.
-#include "xll_template.h"
+﻿// xll_option.cpp - Black-Scholes/Merton option value and greeks.
+#include "bsm_option.h"
 
 using namespace xll;
-using namespace FRE6233;
+using namespace bsm;
 
 // Create XML documentation and index.html in `$(TargetPath)` folder.
 // Use `xsltproc file.xml -o file.html` to create HTML documentation.
@@ -50,8 +50,7 @@ and \(E[\max\{k - F, 0\}]\) for a put.
 double WINAPI xll_option_value(double f, double s, double k)
 {
 #pragma XLLEXPORT
-	// c - p = f - k
-	return k < 0 ? option::value(f, s, -k) : option::value(f, s, k) + f - k;
+	return option::value(f, s, k);
 }
 
 AddIn xai_option_delta(
@@ -70,6 +69,5 @@ Option delta is the derivative of option value with respect to forward.
 double WINAPI xll_option_delta(double f, double s, double k)
 {
 #pragma XLLEXPORT
-	// dc - dp = 1
-	return k < 0 ? option::delta(f, s, -k) : 1 + option::delta(f, s, k);
+	return option::delta(f, s, k);
 }

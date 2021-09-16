@@ -6,7 +6,7 @@
     <ProjectGuid>{6037ff2b-867b-45e1-b580-347063dc9efb}</ProjectGuid>
     <RootNamespace>xllproject1</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>xll_template</ProjectName>
+    <ProjectName>FRE6233</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,10 +95,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="xll_template.cpp" />
+    <ClCompile Include="xll_option.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="xll_template.h" />
+    <ClInclude Include="bsm_option.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
