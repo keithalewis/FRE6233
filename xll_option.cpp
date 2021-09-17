@@ -1,8 +1,8 @@
 ﻿// xll_option.cpp - Black-Scholes/Merton option value and greeks.
-#include "bsm_option.h"
+#include "fsm_option.h"
 
 using namespace xll;
-using namespace bsm;
+using namespace fms;
 
 // Create XML documentation and index.html in `$(TargetPath)` folder.
 // Use `xsltproc file.xml -o file.html` to create HTML documentation.

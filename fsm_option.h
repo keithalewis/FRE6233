@@ -8,7 +8,7 @@
 #define CATEGORY "FRE6233"
 #endif
 
-namespace bsm {
+namespace fms {
 
 	// Return NaN to indicate error.
 	constexpr double NaN = std::numeric_limits<double>::quiet_NaN();

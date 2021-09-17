@@ -98,7 +98,7 @@
     <ClCompile Include="xll_option.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bsm_option.h" />
+    <ClInclude Include="fsm_option.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
