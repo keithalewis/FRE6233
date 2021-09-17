@@ -12,6 +12,10 @@ namespace bsm {
 
 	// Return NaN to indicate error.
 	constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
+
+	// Machine epsilon
+	constexpr double epsilon = std::numeric_limits<double>::epsilon();
+
 	// sqrt(2 pi)
 	constexpr double M_SQRT2PI = 2.50662827463100050240;
 #ifndef M_SQRT2
@@ -87,7 +91,7 @@ namespace bsm {
 			}
 		}
 
-		// put (k < 0) or call (k > 0) option delta
+		// put (k < 0) or call (k > 0) option delta, dv/dk
 		inline double delta(double f, double s, double k)
 		{
 			if (k < 0) { // put
@@ -101,6 +105,51 @@ namespace bsm {
 			}
 		}
 
+		// put (k < 0) or call (k > 0) option vega, dv/ds
+		inline double vega(double f, double s, double k)
+		{
+			k = std::fabs(k); // same for put or call
+			double m = moneyness(f, s, k);
+
+			return -f * normal::cdf(m, s, 0, 1);
+		}
+
+		// implied volatility using initial guess, max number of iterations, and tolerance
+		inline double implied(double f, double v, double k,
+			double s = 0, unsigned n = 0, double eps = 0)
+		{
+			if (s == 0) {
+				s = 0.1; // initial vol guess
+			}
+			if (n == 0) {
+				n = 100; // maximum number of iterations
+			}
+			if (eps == 0) {
+				eps = sqrt(epsilon); // absolute tolerance
+			}
+
+			double v_ = value(f, s, k);
+			double dv_ = vega(f, s, k);
+			double s_ = s - (v_ - v) / dv_; // Newton-Raphson
+			if (s_ < 0) {
+				s_ = s / 2;
+			}
+			while (fabs(s_ - s) > eps) {
+				v_ = value(f, s_, k);
+				dv_ = vega(f, s_, k);
+				s = s_ - (v_ - v) / dv_;
+				if (s < 0) {
+					s = s_ / 2;
+				}
+				std::swap(s_, s);
+				if (n == 0) {
+					return NaN;
+				}
+				--n;
+			}
+
+			return s_;
+		}
 	}
 
 }

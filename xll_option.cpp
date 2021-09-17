@@ -71,3 +71,44 @@ double WINAPI xll_option_delta(double f, double s, double k)
 #pragma XLLEXPORT
 	return option::delta(f, s, k);
 }
+
+AddIn xai_option_vega(
+	Function(XLL_DOUBLE, "xll_option_vega", "OPTION.VEGA")
+	.Arguments({
+		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "s", "is the vol."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		})
+		.FunctionHelp("Return the option call (k > 0) or put (k < 0) vega.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Option vega is the derivative of option value with respect to vol.
+)")
+);
+double WINAPI xll_option_vega(double f, double s, double k)
+{
+#pragma XLLEXPORT
+	return option::vega(f, s, k);
+}
+
+AddIn xai_option_implied(
+	Function(XLL_DOUBLE, "xll_option_implied", "OPTION.IMPLIED")
+	.Arguments({
+		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "v", "is the value."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		Arg(XLL_DOUBLE, "_s", "is an optional initial guess. Default is 0.1."),
+		Arg(XLL_WORD, "_n", "is an optional maximum number of iterations. Default is 100."),
+		Arg(XLL_DOUBLE, "_eps", "is an optional absolute tolerance. Default is square root of machine epsilon."),
+		})
+	.FunctionHelp("Return the option call (k > 0) or put (k < 0) implied vol.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Option implied vol is the inverse of value.
+)")
+);
+double WINAPI xll_option_implied(double f, double v, double k, double s, unsigned n, double eps)
+{
+#pragma XLLEXPORT
+	return option::implied(f, v, k, s, n, eps);
+}
