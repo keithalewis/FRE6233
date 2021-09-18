@@ -1,12 +1,11 @@
-// bsm_option.h - Black-Scholes/Merton option value and greeks
+// fsm_option.h - Option value and greeks
 #pragma once
 #include <cmath>
 #include <limits>
-#include "xll/xll/xll.h"
+#include <tuple>
+#include "fms_variate_normal.h"
 
-#ifndef CATEGORY
-#define CATEGORY "FRE6233"
-#endif
+using namespace fms::variate;
 
 namespace fms {
 
@@ -15,55 +14,6 @@ namespace fms {
 
 	// Machine epsilon
 	constexpr double epsilon = std::numeric_limits<double>::epsilon();
-
-	// sqrt(2 pi)
-	constexpr double M_SQRT2PI = 2.50662827463100050240;
-#ifndef M_SQRT2
-	// sqrt(2)
-	constexpr double M_SQRT2 = 1.41421356237309504880;
-#endif
-
-	// standard normal random variate
-	namespace normal {
-
-		// P(X <= x) and derivatives
-		inline double cdf(double x, int n = 0) 
-		{
-			if (n == 0) {
-				return  (1 + ::erf(x / M_SQRT2)) / 2;
-			}
-
-			double phi = ::exp(-x * x / 2) / M_SQRT2PI;
-			
-			if (n == 1) {
-				return phi;
-			}
-			//!!! Hermite polynomials
-
-			return NaN;
-		}
-		// P_s(X <= x) = P(X <= x - s)
-		inline double cdf(double x, double s, int nx = 0, int ns = 0)
-		{
-			return cdf(x - s, nx + ns) * (ns % 2 ? -1 : 1);
-		}
-
-		// kappa(s) = log E[e^{sX}] = s^2/2 and derivativs
-		inline double cumulant(double s, int n = 0)
-		{
-			if (n == 0) {
-				return s * s / 2;
-			}
-			if (n == 1) {
-				return s;
-			}
-			if (n == 2) {
-				return 1;
-			}
-
-			return 0;
-		}
-	}
 
 	namespace option {
 
@@ -74,7 +24,7 @@ namespace fms {
 				return NaN;
 			}
 
-			return (log(k / f) + normal::cumulant(s)) / s;
+			return (std::log(k / f) + normal::cumulant(s)) / s;
 		}
 
 		// put (k < 0) or call (k > 0) option value
@@ -87,11 +37,11 @@ namespace fms {
 			}
 			else { // call
 				// c = p + f - k
-				return option::value(f, s, -k) + f - k;
+				return value(f, s, -k) + f - k;
 			}
 		}
 
-		// put (k < 0) or call (k > 0) option delta, dv/dk
+		// put (k < 0) or call (k > 0) option delta, dv/df
 		inline double delta(double f, double s, double k)
 		{
 			if (k < 0) { // put
@@ -101,8 +51,17 @@ namespace fms {
 			}
 			else { // call
 				// dc/df = dp/df + 1
-				return option::delta(f, s, -k) + 1;
+				return delta(f, s, -k) + 1;
 			}
+		}
+
+
+		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
+		inline double gamma(double f, double s, double k)
+		{
+			double m = moneyness(f, s, std::fabs(k));
+
+			return normal::cdf(m, s, 1) / (f * s);
 		}
 
 		// put (k < 0) or call (k > 0) option vega, dv/ds
@@ -111,21 +70,35 @@ namespace fms {
 			k = std::fabs(k); // same for put or call
 			double m = moneyness(f, s, k);
 
-			return -f * normal::cdf(m, s, 0, 1);
+			return -normal::cdf(m, s, 0, 1) * f;
+		}
+
+		// put (k < 0) or call (k > 0) option theta, dv/ds
+		inline double theta(double f, double sigma, double k, double t)
+		{
+			return vega(f, sigma * sqrt(t), k) * sigma / (2 * sqrt(t));
 		}
 
 		// implied volatility using initial guess, max number of iterations, and tolerance
 		inline double implied(double f, double v, double k,
-			double s = 0, unsigned n = 0, double eps = 0)
+			double s = 0, unsigned n = 0, double tol = 0)
 		{
+			// value must be greater than intrinsic
+			if (k < 0 and v <= std::max(-k - f, 0.)) {
+				return NaN;
+			}
+			else if (k > 0 and v <= std::max(f - k, 0.)) {
+				return NaN;
+			}
+
 			if (s == 0) {
 				s = 0.1; // initial vol guess
 			}
 			if (n == 0) {
 				n = 100; // maximum number of iterations
 			}
-			if (eps == 0) {
-				eps = sqrt(epsilon); // absolute tolerance
+			if (tol == 0) {
+				tol = sqrt(epsilon); // absolute tolerance
 			}
 
 			double v_ = value(f, s, k);
@@ -134,7 +107,7 @@ namespace fms {
 			if (s_ < 0) {
 				s_ = s / 2;
 			}
-			while (fabs(s_ - s) > eps) {
+			while (fabs(s_ - s) > tol) {
 				v_ = value(f, s_, k);
 				dv_ = vega(f, s_, k);
 				s = s_ - (v_ - v) / dv_;
@@ -150,6 +123,56 @@ namespace fms {
 
 			return s_;
 		}
+
+		struct contract {
+			double k; // strike
+			double t; // expiration
+		};
+		struct put : contract {};
+		struct call : contract {};
+		struct digital_put : contract {};
+		struct digital_call : contract {};
+
+		namespace bsm { // Black-Sholes/Mertion option value and greeks
+
+			// Convert B-S/M parameters to Black forward parameters.
+			inline std::tuple<double,double,double> fsk(double r, double S, double sigma, const contract& o)
+			{
+				double D = std::exp(-r * o.t);
+				double f = S / D;
+				double s = sigma * sqrt(o.t);
+
+				return { f, s, o.k };
+			}
+
+			// call using moneyness(r, S, sigma, contract({k, t}))
+			inline double moneyness(double r, double S, double sigma, const contract& o)
+			{
+				auto [f, s, k] = fsk(r, S, sigma, o);
+
+				return option::moneyness(f, s, o.k);
+			}
+
+			inline double value(double r, double S, double sigma, put o)
+			{
+				double D = exp(-r * o.t);
+				double f = S / D;
+				double s = sigma * sqrt(o.t);
+
+				return D * option::value(f, s, -o.k);
+			}
+
+			inline double value(double r, double S, double sigma, call o)
+			{
+				double D = exp(-r * o.t);
+				double f = S / D;
+				double s = sigma * sqrt(o.t);
+
+				return D * option::value(f, s, o.k);
+			}
+
+
+		} // namespace bsm
 	}
 
 }

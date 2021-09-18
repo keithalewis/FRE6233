@@ -1,5 +1,10 @@
 ﻿// xll_option.cpp - Black-Scholes/Merton option value and greeks.
 #include "fsm_option.h"
+#include "xll/xll/xll.h"
+
+#ifndef CATEGORY
+#define CATEGORY "FRE6233"
+#endif
 
 using namespace xll;
 using namespace fms;
@@ -50,6 +55,7 @@ and \(E[\max\{k - F, 0\}]\) for a put.
 double WINAPI xll_option_value(double f, double s, double k)
 {
 #pragma XLLEXPORT
+
 	return option::value(f, s, k);
 }
 
@@ -72,6 +78,25 @@ double WINAPI xll_option_delta(double f, double s, double k)
 	return option::delta(f, s, k);
 }
 
+AddIn xai_option_gamma(
+	Function(XLL_DOUBLE, "xll_option_gamma", "OPTION.GAMMA")
+	.Arguments({
+		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "s", "is the vol."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		})
+		.FunctionHelp("Return the option call (k > 0) or put (k < 0) gamma.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Option gamma is the second derivative of option value with respect to forward.
+)")
+);
+double WINAPI xll_option_gamma(double f, double s, double k)
+{
+#pragma XLLEXPORT
+	return option::gamma(f, s, k);
+}
+
 AddIn xai_option_vega(
 	Function(XLL_DOUBLE, "xll_option_vega", "OPTION.VEGA")
 	.Arguments({
@@ -91,11 +116,31 @@ double WINAPI xll_option_vega(double f, double s, double k)
 	return option::vega(f, s, k);
 }
 
+AddIn xai_option_theta(
+	Function(XLL_DOUBLE, "xll_option_theta", "OPTION.THETA")
+	.Arguments({
+		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		Arg(XLL_DOUBLE, "t", "is the time in years to expiration")
+		})
+		.FunctionHelp("Return the option call (k > 0) or put (k < 0) theta.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Option theta is the derivative of option value with respect to time.
+)")
+);
+double WINAPI xll_option_theta(double f, double sigma, double k, double t)
+{
+#pragma XLLEXPORT
+	return option::theta(f, sigma, k, t);
+}
+
 AddIn xai_option_implied(
 	Function(XLL_DOUBLE, "xll_option_implied", "OPTION.IMPLIED")
 	.Arguments({
 		Arg(XLL_DOUBLE, "f", "is the forward."),
-		Arg(XLL_DOUBLE, "v", "is the value."),
+		Arg(XLL_DOUBLE, "v", "is the option value."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "_s", "is an optional initial guess. Default is 0.1."),
 		Arg(XLL_WORD, "_n", "is an optional maximum number of iterations. Default is 100."),

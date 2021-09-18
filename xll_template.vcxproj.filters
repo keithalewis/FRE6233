@@ -23,5 +23,11 @@
     <ClInclude Include="fsm_option.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fms_derivative.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fms_variate_normal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

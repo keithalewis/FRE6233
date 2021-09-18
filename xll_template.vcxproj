@@ -98,6 +98,8 @@
     <ClCompile Include="xll_option.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fms_derivative.h" />
+    <ClInclude Include="fms_variate_normal.h" />
     <ClInclude Include="fsm_option.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
