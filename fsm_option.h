@@ -55,7 +55,6 @@ namespace fms {
 			}
 		}
 
-
 		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
 		inline double gamma(double f, double s, double k)
 		{
@@ -83,6 +82,10 @@ namespace fms {
 		inline double implied(double f, double v, double k,
 			double s = 0, unsigned n = 0, double tol = 0)
 		{
+			// vol must be finite
+			if (v >= f) {
+				return NaN;
+			}
 			// value must be greater than intrinsic
 			if (k < 0 and v <= std::max(-k - f, 0.)) {
 				return NaN;
