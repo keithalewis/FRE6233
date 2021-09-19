@@ -55,7 +55,6 @@ and \(E[\max\{k - F, 0\}]\) for a put.
 double WINAPI xll_option_value(double f, double s, double k)
 {
 #pragma XLLEXPORT
-
 	return option::value(f, s, k);
 }
 
@@ -144,7 +143,7 @@ AddIn xai_option_implied(
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "_s", "is an optional initial guess. Default is 0.1."),
 		Arg(XLL_WORD, "_n", "is an optional maximum number of iterations. Default is 100."),
-		Arg(XLL_DOUBLE, "_eps", "is an optional absolute tolerance. Default is square root of machine epsilon."),
+		Arg(XLL_DOUBLE, "_tol", "is an optional absolute tolerance. Default is square root of machine epsilon."),
 		})
 	.FunctionHelp("Return the option call (k > 0) or put (k < 0) implied vol.")
 	.Category(CATEGORY)
@@ -152,8 +151,8 @@ AddIn xai_option_implied(
 Option implied vol is the inverse of value.
 )")
 );
-double WINAPI xll_option_implied(double f, double v, double k, double s, unsigned n, double eps)
+double WINAPI xll_option_implied(double f, double v, double k, double s, unsigned n, double tol)
 {
 #pragma XLLEXPORT
-	return option::implied(f, v, k, s, n, eps);
+	return option::implied(f, v, k, s, n, tol);
 }

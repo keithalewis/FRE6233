@@ -31,9 +31,9 @@ namespace fms {
 		inline double value(double f, double s, double k)
 		{
 			if (k < 0) { // put
-				double m = moneyness(f, s, -k);
+				double x = moneyness(f, s, -k);
 
-				return (-k) * normal::cdf(m) - f * normal::cdf(m, s);
+				return (-k) * normal::cdf(x) - f * normal::cdf(x, s);
 			}
 			else { // call
 				// c = p + f - k
@@ -45,9 +45,9 @@ namespace fms {
 		inline double delta(double f, double s, double k)
 		{
 			if (k < 0) { // put
-				double m = moneyness(f, s, -k);
+				double x = moneyness(f, s, -k);
 
-				return -normal::cdf(m, s);
+				return -normal::cdf(x, s);
 			}
 			else { // call
 				// dc/df = dp/df + 1
@@ -59,21 +59,21 @@ namespace fms {
 		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
 		inline double gamma(double f, double s, double k)
 		{
-			double m = moneyness(f, s, fabs(k));
+			double x = moneyness(f, s, std::fabs(k));
 
-			return normal::cdf(m, s, 1) / (f * s);
+			return normal::cdf(x, s, 1) / (f * s);
 		}
 
 		// put (k < 0) or call (k > 0) option vega, dv/ds
 		inline double vega(double f, double s, double k)
 		{
-			k = fabs(k); // same for put or call
-			double m = moneyness(f, s, k);
+			k = std::fabs(k); // same for put or call
+			double x = moneyness(f, s, k);
 
-			return -normal::cdf(m, s, 0, 1) * f;
+			return -normal::cdf(x, s, 0, 1) * f;
 		}
 
-		// put (k < 0) or call (k > 0) option theta, dv/ds
+		// put (k < 0) or call (k > 0) option theta, dv/dt
 		inline double theta(double f, double sigma, double k, double t)
 		{
 			return vega(f, sigma * sqrt(t), k) * sigma / (2 * sqrt(t));
@@ -136,41 +136,38 @@ namespace fms {
 		namespace bsm { // Black-Sholes/Mertion option value and greeks
 
 			// Convert B-S/M parameters to Black forward parameters.
-			inline std::tuple<double,double,double> fsk(double r, double S, double sigma, const contract& o)
+			inline auto Dfsk(double r, double S, double sigma, const contract& o)
 			{
 				double D = exp(-r * o.t);
 				double f = S / D;
 				double s = sigma * sqrt(o.t);
 
-				return { f, s, o.k };
+				return std::tuple(D, f, s, o.k);
 			}
 
 			// call using moneyness(r, S, sigma, contract({k, t}))
 			inline double moneyness(double r, double S, double sigma, const contract& o)
 			{
-				auto [f, s, k] = fsk(r, S, sigma, o);
+				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
 				return option::moneyness(f, s, o.k);
 			}
 
 			inline double value(double r, double S, double sigma, put o)
 			{
-				double D = exp(-r * o.t);
-				double f = S / D;
-				double s = sigma * sqrt(o.t);
+				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
 				return D * option::value(f, s, -o.k);
 			}
 
 			inline double value(double r, double S, double sigma, call o)
 			{
-				double D = exp(-r * o.t);
-				double f = S / D;
-				double s = sigma * sqrt(o.t);
+				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
 				return D * option::value(f, s, o.k);
 			}
 
+			// delta, ...
 
 		} // namespace bsm
 	}
