@@ -82,16 +82,19 @@ namespace fms {
 		inline double implied(double f, double v, double k,
 			double s = 0, unsigned n = 0, double tol = 0)
 		{
-			// vol must be finite
-			if (v >= f) {
-				return NaN;
+			// max(k - f,0) >= k - f
+			// max(k - f,0) <= k
+			if (k < 0) {
+				if (v <= std::max(-k - f, 0.) or v >= k) {
+					return NaN;
+				}
 			}
-			// value must be greater than intrinsic
-			if (k < 0 and v <= std::max(-k - f, 0.)) {
-				return NaN;
-			}
-			else if (k > 0 and v <= std::max(f - k, 0.)) {
-				return NaN;
+			// max(f - k,0) >= f - k
+			// max(f - k,0) <= f
+			else if (k > 0) {
+				if (v <= std::max(f - k, 0.) or v >= f) {
+					return NaN;
+				}
 			}
 
 			if (s == 0) {

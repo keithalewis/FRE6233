@@ -15,7 +15,7 @@ namespace fms {
 
 	// (f(x + h) - f(x - h))/2h = f'(x) + f'''(x) h^2/3! + ...
 	template<class X, class Y>
-	inline bool test_derivative(const std::function<Y(X)>& f, X x, X h, X df, X dddf, X tol = 1)
+	inline bool derivative_test(const std::function<Y(X)>& f, X x, X h, X df, X dddf, X tol = 1)
 	{
 		auto Df = difference_quotient(f, h);
 
