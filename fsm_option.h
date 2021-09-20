@@ -24,7 +24,7 @@ namespace fms {
 				return NaN;
 			}
 
-			return (std::log(k / f) + normal::cumulant(s)) / s;
+			return (log(k / f) + normal::cumulant(s)) / s;
 		}
 
 		// put (k < 0) or call (k > 0) option value
@@ -67,7 +67,7 @@ namespace fms {
 		// put (k < 0) or call (k > 0) option vega, dv/ds
 		inline double vega(double f, double s, double k)
 		{
-			k = std::fabs(k); // same for put or call
+			k = fabs(k); // same for put or call
 			double x = moneyness(f, s, k);
 
 			return -normal::cdf(x, s, 0, 1) * f;
