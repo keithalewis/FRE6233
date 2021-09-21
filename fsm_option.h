@@ -35,10 +35,13 @@ namespace fms {
 
 				return (-k) * normal::cdf(x) - f * normal::cdf(x, s);
 			}
-			else { // call
+			else if (k > 0) { // call
 				// c = p + f - k
 				return value(f, s, -k) + f - k;
 			}
+
+			// k = +/- 0
+			return signbit(k) ? 0 : f;
 		}
 
 		// put (k < 0) or call (k > 0) option delta, dv/df
@@ -49,10 +52,12 @@ namespace fms {
 
 				return -normal::cdf(x, s);
 			}
-			else { // call
+			else if (k > 0) { // call
 				// dc/df = dp/df + 1
 				return delta(f, s, -k) + 1;
 			}
+
+			return signbit(k) ? 0 : 1;
 		}
 
 		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
@@ -108,7 +113,7 @@ namespace fms {
 			}
 
 			double v_ = value(f, s, k);
-			double dv_ = vega(f, s, k);
+			double dv_ = vega(f, s, k); // dv/ds
 			double s_ = s - (v_ - v) / dv_; // Newton-Raphson
 			if (s_ < 0) {
 				s_ = s / 2;
@@ -134,12 +139,14 @@ namespace fms {
 			double k; // strike
 			double t; // expiration
 		};
+		// different types with the same data
 		struct put : contract {};
 		struct call : contract {};
 		struct digital_put : contract {};
 		struct digital_call : contract {};
 
-		namespace bsm { // Black-Sholes/Mertion option value and greeks
+		// Black-Scholes/Mertion option value and greeks
+		namespace bsm {
 
 			// Convert B-S/M parameters to Black forward parameters.
 			inline auto Dfsk(double r, double S, double sigma, const contract& o)
@@ -152,6 +159,7 @@ namespace fms {
 			}
 
 			// call using moneyness(r, S, sigma, contract({k, t}))
+			// or moneyness(r, S, sigma, (contract){.k = k, .t = t})
 			inline double moneyness(double r, double S, double sigma, const contract& o)
 			{
 				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
@@ -159,6 +167,7 @@ namespace fms {
 				return option::moneyness(f, s, o.k);
 			}
 
+			// call using value(r, S, sigma, put({k, t}))
 			inline double value(double r, double S, double sigma, put o)
 			{
 				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
