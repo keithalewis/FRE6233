@@ -40,7 +40,7 @@ namespace fms {
 				return value(f, s, -k) + f - k;
 			}
 
-			// k = +/- 0
+			// k = -/+ 0
 			return signbit(k) ? 0 : f;
 		}
 
@@ -71,8 +71,7 @@ namespace fms {
 		// put (k < 0) or call (k > 0) option vega, dv/ds
 		inline double vega(double f, double s, double k)
 		{
-			k = fabs(k); // same for put or call
-			double x = moneyness(f, s, k);
+			double x = moneyness(f, s, fabs(k));
 
 			return -normal::cdf(x, s, 0, 1) * f;
 		}
@@ -90,14 +89,14 @@ namespace fms {
 			// max(k - f,0) >= k - f
 			// max(k - f,0) <= k
 			if (k < 0) {
-				if (v <= std::max(-k - f, 0.) or v >= k) {
+				if (v <= std::max(-k - f, 0.) || v >= k) {
 					return NaN;
 				}
 			}
 			// max(f - k,0) >= f - k
 			// max(f - k,0) <= f
 			else if (k > 0) {
-				if (v <= std::max(f - k, 0.) or v >= f) {
+				if (v <= std::max(f - k, 0.) || v >= f) {
 					return NaN;
 				}
 			}
@@ -164,7 +163,7 @@ namespace fms {
 			{
 				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-				return option::moneyness(f, s, o.k);
+				return option::moneyness(f, s, fabs(o.k));
 			}
 
 			// call using value(r, S, sigma, put({k, t}))

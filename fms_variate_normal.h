@@ -46,7 +46,7 @@ namespace fms::variate {
 		}
 
 		// P_s(X <= x) = P(X <= x - s)
-		static double cdf(double x, double s = 0., unsigned nx = 0, unsigned ns = 0)
+		static double cdf(double x, double s = 0, unsigned nx = 0, unsigned ns = 0)
 		{
 			return N(x - s, nx + ns) * (ns & 1 ? -1 : 1);
 		}
