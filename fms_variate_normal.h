@@ -32,10 +32,10 @@ namespace fms::variate {
 		static double N(double x, unsigned n = 0)
 		{
 			if (n == 0) {
-				return  (1 + ::erf(x / M_SQRT2)) / 2;
+				return  (1 + erf(x / M_SQRT2)) / 2;
 			}
 
-			double phi = ::exp(-x * x / 2) / M_SQRT2PI;
+			double phi = exp(-x * x / 2) / M_SQRT2PI;
 
 			if (n == 1) {
 				return phi;
