@@ -26,6 +26,15 @@ namespace fms {
 
 			return (log(k / f) + normal::cumulant(s)) / s;
 		}
+		//  moneyness
+		inline double moneyness(double t, double f, double sigma, double k)
+		{
+			if (t <= 0 || f <= 0 || sigma <= 0 || k <= 0) {
+				return NaN;
+			}
+
+			return (log(k / f) + normal::cumulant(t, sigma)) / sigma;
+		}
 
 		// put (k < 0) or call (k > 0) option value
 		inline double value(double f, double s, double k)
@@ -33,7 +42,7 @@ namespace fms {
 			if (k < 0) { // put
 				double x = moneyness(f, s, -k);
 
-				return (-k) * normal::cdf(x) - f * normal::cdf(x, s);
+				return (-k) * normal::cdf(x, 0, 0, 0) - f * normal::cdf(x, s, 0, 0);
 			}
 			else if (k > 0) { // call
 				// c = p + f - k
@@ -43,6 +52,23 @@ namespace fms {
 			// k = -/+ 0
 			return signbit(k) ? 0 : f;
 		}
+		// put (k < 0) or call (k > 0) option value
+		inline double value(double t, double f, double sigma, double k)
+		{
+			if (k < 0) { // put
+				double x = moneyness(t, f, sigma, -k);
+
+				return (-k) * normal::cdf(t, x, 0, 0, 0) - f * normal::cdf(t, x, sigma, 0, 0);
+			}
+			else if (k > 0) { // call
+				// c = p + f - k
+				return value(t, f, sigma, -k) + f - k;
+			}
+
+			// k = -/+ 0
+			return signbit(k) ? 0 : f;
+		}
+
 
 		// put (k < 0) or call (k > 0) option delta, dv/df
 		inline double delta(double f, double s, double k)
@@ -50,7 +76,7 @@ namespace fms {
 			if (k < 0) { // put
 				double x = moneyness(f, s, -k);
 
-				return -normal::cdf(x, s);
+				return -normal::cdf(x, s, 0, 0);
 			}
 			else if (k > 0) { // call
 				// dc/df = dp/df + 1
@@ -65,7 +91,7 @@ namespace fms {
 		{
 			double x = moneyness(f, s, std::fabs(k));
 
-			return normal::cdf(x, s, 1) / (f * s);
+			return normal::cdf(x, s, 1, 0) / (f * s);
 		}
 
 		// put (k < 0) or call (k > 0) option vega, dv/ds

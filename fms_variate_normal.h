@@ -46,9 +46,22 @@ namespace fms::variate {
 		}
 
 		// P_s(X <= x) = P(X <= x - s)
-		static double cdf(double x, double s = 0, unsigned nx = 0, unsigned ns = 0)
+		static double cdf(double x, double s, unsigned nx, unsigned ns)
 		{
 			return N(x - s, nx + ns) * (ns & 1 ? -1 : 1);
+		}
+		// E_t^sigma[g(X_t)] = E[e^{sigma X_t - kappa_t(sigma)} g(X_t)]
+		//	= E[g(X_t + Cov(sigma X_t, X_t))]
+		//	= E[g(X_t + sigma t)]
+		// P_t^sigma(X_t <= x) = P(X_t + sigma t <= x) 
+		// = P(X_t <= x - sigma t) = P(X_t/sqrt(t) <= (x - sigma t)/sqrt(t))
+		// = N((x - sigma t)/sqrt(t))
+		// D_x^n N = N^{n}(...) / (sqrt(t))^n
+		// D_sigma N = N^{n}(...) * (sqrt(t))^n (-1)^{n%2}
+		static double cdf(double t, double x, double sigma, unsigned nx, unsigned nsigma)
+		{
+			return N((x - sigma * t)/sqrt(t), nx + nsigma) 
+				* pow(sqrt(t), nsigma - nx) * (nsigma & 1 ? -1 : 1);
 		}
 
 		// kappa(s) = log E[e^{sX}] = s^2/2 and derivativs
@@ -62,6 +75,21 @@ namespace fms::variate {
 			}
 			if (n == 2) {
 				return 1;
+			}
+
+			return 0;
+		}
+		// kappa(t, sigma) = log E[e^{sigma X_t}] = sigma^2 t/2 and derivativs
+		static double cumulant(double t, double sigma, unsigned n = 0)
+		{
+			if (n == 0) {
+				return sigma * sigma * t/ 2;
+			}
+			if (n == 1) {
+				return sigma * t;
+			}
+			if (n == 2) {
+				return t;
 			}
 
 			return 0;
