@@ -58,6 +58,27 @@ double WINAPI xll_option_value(double f, double s, double k)
 	return option::value(f, s, k);
 }
 
+AddIn xai_black_value(
+	Function(XLL_DOUBLE, "xll_black_value", "BLACK.VALUE")
+	.Arguments({
+		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		})
+		.FunctionHelp("Return the Black call (k > 0) or put (k < 0) value.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Black value is \(E[\max\{F - k, 0\}]\) for a call
+and \(E[\max\{k - F, 0\}]\) for a put.
+)")
+);
+double WINAPI xll_black_value(double t, double f, double sigma, double k)
+{
+#pragma XLLEXPORT
+	return option::value(t, f, sigma, k);
+}
+
 AddIn xai_option_delta(
 	Function(XLL_DOUBLE, "xll_option_delta", "OPTION.DELTA")
 	.Arguments({
