@@ -54,10 +54,10 @@ namespace fms::variate {
 		//	= E[g(X_t + Cov(sigma X_t, X_t))]
 		//	= E[g(X_t + sigma t)]
 		// P_t^sigma(X_t <= x) = P(X_t + sigma t <= x) 
-		// = P(X_t <= x - sigma t) = P(X_t/sqrt(t) <= (x - sigma t)/sqrt(t))
-		// = N((x - sigma t)/sqrt(t))
+		//	= P(X_t <= x - sigma t) = P(X_t/sqrt(t) <= (x - sigma t)/sqrt(t))
+		//	= N((x - sigma t)/sqrt(t))
 		// D_x^n N = N^{n}(...) / (sqrt(t))^n
-		// D_sigma N = N^{n}(...) * (sqrt(t))^n (-1)^{n%2}
+		// D_sigma^n N = N^{n}(...) * (sqrt(t))^n (-1)^{n%2}
 		static double cdf(double t, double x, double sigma, unsigned nx, unsigned nsigma)
 		{
 			return N((x - sigma * t)/sqrt(t), nx + nsigma) 

@@ -76,7 +76,7 @@ and \(E[\max\{k - F, 0\}]\) for a put.
 double WINAPI xll_black_value(double t, double f, double sigma, double k)
 {
 #pragma XLLEXPORT
-	return option::value(t, f, sigma, k);
+	return black::value(t, f, sigma, k);
 }
 
 AddIn xai_option_delta(
