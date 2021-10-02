@@ -162,7 +162,6 @@ namespace fms {
 
 				return D * option::value(f, s, -o.k);
 			}
-
 			inline double value(double r, double S, double sigma, call o)
 			{
 				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
