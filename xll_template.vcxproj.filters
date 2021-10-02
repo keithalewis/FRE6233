@@ -18,6 +18,9 @@
     <ClCompile Include="xll_option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fms_variate_normal.t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fsm_option.h">
