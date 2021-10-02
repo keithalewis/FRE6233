@@ -95,13 +95,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="fms_option.t.cpp" />
     <ClCompile Include="fms_variate_normal.t.cpp" />
     <ClCompile Include="xll_option.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_derivative.h" />
     <ClInclude Include="fms_variate_normal.h" />
-    <ClInclude Include="fsm_option.h" />
+    <ClInclude Include="fms_option.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,18 +18,9 @@ namespace fms {
 	namespace option {
 
 		//  moneyness
-		inline double moneyness(double f, double s, double k)
+		inline double moneyness(double f, double sigma, double k, double t)
 		{
-			if (f <= 0 || s <= 0 || k <= 0) {
-				return NaN;
-			}
-
-			return (log(k / f) + normal::cumulant(s)) / s;
-		}
-		//  moneyness
-		inline double moneyness(double t, double f, double sigma, double k)
-		{
-			if (t <= 0 || f <= 0 || sigma <= 0 || k <= 0) {
+			if (f <= 0 || sigma <= 0 || k <= 0 || t <= 0) {
 				return NaN;
 			}
 
@@ -37,79 +28,65 @@ namespace fms {
 		}
 
 		// put (k < 0) or call (k > 0) option value
-		inline double value(double f, double s, double k)
+		inline double value(double f, double sigma, double k, double t)
 		{
 			if (k < 0) { // put
-				double x = moneyness(f, s, -k);
+				double x = moneyness(f, sigma, -k, t);
 
-				return (-k) * normal::cdf(x, 0, 0, 0) - f * normal::cdf(x, s, 0, 0);
+				return (-k) * normal::cdf(t, x, 0) - f * normal::cdf(t, x, sigma);
 			}
 			else if (k > 0) { // call
 				// c = p + f - k
-				return value(f, s, -k) + f - k;
+				return value(f, sigma, -k, t) + f - k;
 			}
 
 			// k = -/+ 0
 			return signbit(k) ? 0 : f;
 		}
-		// put (k < 0) or call (k > 0) option value
-		inline double value(double t, double f, double sigma, double k)
-		{
-			if (k < 0) { // put
-				double x = moneyness(t, f, sigma, -k);
-
-				return (-k) * normal::cdf(t, x, 0, 0, 0) - f * normal::cdf(t, x, sigma, 0, 0);
-			}
-			else if (k > 0) { // call
-				// c = p + f - k
-				return value(t, f, sigma, -k) + f - k;
-			}
-
-			// k = -/+ 0
-			return signbit(k) ? 0 : f;
-		}
-
 
 		// put (k < 0) or call (k > 0) option delta, dv/df
-		inline double delta(double f, double s, double k)
+		inline double delta(double f, double sigma, double k, double t)
 		{
 			if (k < 0) { // put
-				double x = moneyness(f, s, -k);
+				double x = moneyness(f, sigma, -k, t);
 
-				return -normal::cdf(x, s, 0, 0);
+				return -normal::cdf(t, x, sigma, 0, 0);
 			}
 			else if (k > 0) { // call
 				// dc/df = dp/df + 1
-				return delta(f, s, -k) + 1;
+				return delta(f, sigma, -k, t) + 1;
 			}
 
 			return signbit(k) ? 0 : 1;
 		}
 
 		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
-		inline double gamma(double f, double s, double k)
+		inline double gamma(double f, double sigma, double k, double t)
 		{
-			double x = moneyness(f, s, std::fabs(k));
+			double x = moneyness(f, sigma, std::fabs(k), t);
 
-			return normal::cdf(x, s, 1, 0) / (f * s);
+			return normal::cdf(t, x, sigma, 1, 0) / (f * sigma);
 		}
 
 		// put (k < 0) or call (k > 0) option vega, dv/ds
-		inline double vega(double f, double s, double k)
+		inline double vega(double f, double sigma, double k, double t)
 		{
-			double x = moneyness(f, s, fabs(k));
+			double x = moneyness(f, sigma, fabs(k), t);
 
-			return -normal::cdf(x, s, 0, 1) * f;
+			return -normal::cdf(x, sigma, 0, 1) * f;
 		}
 
-		// put (k < 0) or call (k > 0) option theta, dv/dt
-		inline double theta(double f, double sigma, double k, double t)
+		// put (k < 0) or call (k > 0) option theta, -dv/dt
+		inline double theta(double f, double sigma, double k, double t, double dt = 1./250)
 		{
-			return vega(f, sigma * sqrt(t), k) * sigma / (2 * sqrt(t));
+			double v = value(f, sigma, k, t);
+			double v_ = value(f, sigma, k, t - dt);
+
+			return (v - v_) / dt;
 		}
 
 		// implied volatility using initial guess, max number of iterations, and tolerance
-		inline double implied(double f, double v, double k,
+		inline double implied(double f, double v, double k, double t,
 			double s = 0, unsigned n = 0, double tol = 0)
 		{
 			// max(k - f,0) >= k - f
@@ -137,15 +114,15 @@ namespace fms {
 				tol = sqrt(epsilon); // absolute tolerance
 			}
 
-			double v_ = value(f, s, k);
-			double dv_ = vega(f, s, k); // dv/ds
+			double v_ = value(f, s, k, t);
+			double dv_ = vega(f, s, k, t); // dv/ds
 			double s_ = s - (v_ - v) / dv_; // Newton-Raphson
 			if (s_ < 0) {
 				s_ = s / 2;
 			}
 			while (fabs(s_ - s) > tol) {
-				v_ = value(f, s_, k);
-				dv_ = vega(f, s_, k);
+				v_ = value(f, s_, k, t);
+				dv_ = vega(f, s_, k, t);
 				s = s_ - (v_ - v) / dv_;
 				if (s < 0) {
 					s = s_ / 2;
@@ -160,6 +137,16 @@ namespace fms {
 			return s_;
 		}
 	}
+
+	struct contract {
+		double k; // strike
+		double t; // expiration
+	};
+	// different types with the same data
+	struct put : contract {};
+	struct call : contract {};
+	struct digital_put : contract {};
+	struct digital_call : contract {};
 
 	namespace black {
 		
@@ -282,15 +269,6 @@ namespace fms {
 
 	} // namespace black
 
-	struct contract {
-		double k; // strike
-		double t; // expiration
-	};
-	// different types with the same data
-	struct put : contract {};
-	struct call : contract {};
-	struct digital_put : contract {};
-	struct digital_call : contract {};
 
 	// Black-Scholes/Mertion option value and greeks
 	namespace bsm {
@@ -311,7 +289,7 @@ namespace fms {
 		{
 			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-			return option::moneyness(f, s, fabs(o.k));
+			return option::moneyness(f, s, fabs(o.k), o.t);
 		}
 
 		// call using value(r, S, sigma, put({k, t}))
@@ -319,13 +297,13 @@ namespace fms {
 		{
 			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-				return D * option::value(f, s, -o.k);
-			}
-			inline double value(double r, double S, double sigma, call o)
-			{
-				auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			return D * option::value(f, s, -o.k, o.t);
+		}
+		inline double value(double r, double S, double sigma, call o)
+		{
+			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-			return D * option::value(f, s, o.k);
+			return D * option::value(f, s, o.k, o.t);
 		}
 
 		// delta, ...

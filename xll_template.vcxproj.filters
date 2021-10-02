@@ -21,9 +21,12 @@
     <ClCompile Include="fms_variate_normal.t.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fms_option.t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fsm_option.h">
+    <ClInclude Include="fms_option.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fms_derivative.h">
