@@ -1,8 +1,24 @@
 // fms_derivative.h - Test derivatives
 #pragma once
 #include <functional>
-
+#include <limits>
+#include <valarray>
 namespace fms {
+
+	inline constexpr double epsilon = std::numeric_limits<double>::epsilon();
+
+	// sequence from b to e with increment dx
+	inline std::valarray<double> sequence(double b, double e, double dx)
+	{
+		size_t n = static_cast<unsigned>(1 + (e - b) / dx);
+		std::valarray<double> a(n);
+
+		for (size_t i = 0; i < n; ++i) {
+			a[i] = b + i * dx;
+		}
+
+		return a;
+	}
 
 	// symmetric difference quotient
 	template<class X, class Y>
@@ -19,7 +35,18 @@ namespace fms {
 	{
 		auto Df = difference_quotient(f, h);
 
-		return std::fabs(Df(x) - df) < tol * std::fabs(dddf * h * h / 6);
+		double lhs = Df(x) - df;
+		double rhs = dddf * h * h / 6;
+
+		bool b = std::fabs(lhs) < tol * std::fabs(rhs);
+		if (!b) {
+			tol = lhs / rhs;
+			if (std::fabs(lhs) < sqrt(epsilon) && std::fabs(rhs) < sqrt(epsilon)) {
+				b = true;
+			}
+		}
+
+		return b;
 	}
 
 }

@@ -48,7 +48,7 @@ namespace fms::variate {
 		// P_t^sigma(X_t <= x) = N((x - sigma t)/sqrt(t))
 		// D_x^n N = N^{(n)}(...) / (sqrt(t))^n
 		// D_sigma^n N = N^{(n)}(...) * (sqrt(t))^n (-1)^n
-		static double cdf(double t, double x, double sigma, unsigned nx = 0, unsigned nsigma = 0)
+		static double cdf(double t, double x, double sigma, int nx = 0, int nsigma = 0)
 		{
 			double srt = sqrt(t);
 

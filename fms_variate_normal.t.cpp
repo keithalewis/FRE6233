@@ -24,7 +24,7 @@ int fms_variant_normal_H_test()
 
 		// H_2(x) = x^2 - 1
 		for (double x : xs) {
-			assert(x*x - 1 == normal::H(2, x));
+			assert(x * x - 1 == normal::H(2, x));
 		}
 	}
 
@@ -48,7 +48,7 @@ int fms_variant_normal_N_test()
 		for (double x : xs) {
 			for (double h : hs) {
 				double df = (normal::N(x + h) - normal::N(x - h)) / (2 * h);
-				assert(fabs(normal::N(x, 1) - df) < h*h);
+				assert(fabs(normal::N(x, 1) - df) < h * h);
 			}
 		}
 		// N''(x)
@@ -73,5 +73,36 @@ int fms_variant_normal_N_test()
 	return 0;
 }
 int fms_variant_normal_N_test_ = fms_variant_normal_N_test();
+
+int fms_variant_normal_cdf_test()
+{
+	for (double x : sequence(-2, 2, .1)) {
+		for (double s : sequence(-1, 1, .1)) {
+			for (int nx : {0, 1, 2, 3}) {
+				for (int ns : {0, 1, 2, 3}) {
+					for (double t : sequence(0.1, 2, .1)) {
+						for (double h : { .01, .001, .0001, .00001}) {
+							{
+								auto f = [t, s, nx, ns](double x) { return normal::cdf(t, x, s, nx, ns); };
+								auto df = normal::cdf(t, x, s, nx + 1, ns);
+								double dddf = normal::cdf(t, x, s, nx + 3, ns);
+								assert((derivative_test<double,double>(f, x, h, df, dddf, 10.)));
+							}
+							{
+								auto f = [t, x, nx, ns](double s) { return normal::cdf(t, x, s, nx, ns); };
+								auto df = normal::cdf(t, x, s, nx, ns + 1);
+								double dddf = normal::cdf(t, x, s, nx, ns + 3);
+								assert((derivative_test<double, double>(f, s, h, df, dddf, 10.)));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+int fms_variant_normal_cdf_test_ = fms_variant_normal_cdf_test();
 
 #endif // _DEBUG
