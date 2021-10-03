@@ -70,7 +70,7 @@ namespace fms {
 		{
 			double x = moneyness(f, sigma, fabs(k), t);
 
-			return -f * normal::cdf(x, sigma, 0, 1);
+			return -f * normal::cdf(t, x, sigma, 0, 1);
 		}
 
 		// put (k < 0) or call (k > 0) option theta, -dv/dt
