@@ -84,7 +84,7 @@ namespace fms {
 
 		// implied volatility using initial guess, max number of iterations, and tolerance
 		inline double implied(double f, double v, double k, double t,
-			double s = 0, unsigned n = 0, double tol = 0)
+			double sigma = 0, unsigned n = 0, double tol = 0)
 		{
 			// max(k - f,0) >= k - f
 			// max(k - f,0) <= k
@@ -101,8 +101,8 @@ namespace fms {
 				}
 			}
 
-			if (s == 0) {
-				s = 0.1; // initial vol guess
+			if (sigma == 0) {
+				sigma = 0.1; // initial vol guess
 			}
 			if (n == 0) {
 				n = 100; // maximum number of iterations
@@ -111,27 +111,27 @@ namespace fms {
 				tol = sqrt(std::numeric_limits<double>::epsilon()); // absolute tolerance
 			}
 
-			double v_ = value(f, s, k, t);
-			double dv_ = vega(f, s, k, t); // dv/ds
-			double s_ = s - (v_ - v) / dv_; // Newton-Raphson
-			if (s_ < 0) {
-				s_ = s / 2;
+			double v_ = value(f, sigma, k, t);
+			double dv_ = vega(f, sigma, k, t); // dv/ds
+			double sigma_ = sigma - (v_ - v) / dv_; // Newton-Raphson
+			if (sigma_ < 0) {
+				sigma_ = sigma / 2;
 			}
-			while (fabs(s_ - s) > tol) {
-				v_ = value(f, s_, k, t);
-				dv_ = vega(f, s_, k, t);
-				s = s_ - (v_ - v) / dv_;
-				if (s < 0) {
-					s = s_ / 2;
+			while (fabs(sigma_ - sigma) > tol) {
+				v_ = value(f, sigma_, k, t);
+				dv_ = vega(f, sigma_, k, t);
+				sigma = sigma_ - (v_ - v) / dv_;
+				if (sigma < 0) {
+					sigma = sigma_ / 2;
 				}
-				std::swap(s_, s);
+				std::swap(sigma_, sigma);
 				if (n == 0) {
 					return NaN;
 				}
 				--n;
 			}
 
-			return s_;
+			return sigma_;
 		}
 	}
 
