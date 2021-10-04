@@ -7,6 +7,30 @@ namespace fms {
 
 	inline constexpr double epsilon = std::numeric_limits<double>::epsilon();
 
+	inline double relative_difference(double a, double b)
+	{
+		if (a == 0 and b == 0) {
+			return 0;
+		}
+
+		if (std::signbit(a) != std::signbit(b)) {
+			return std::numeric_limits<double>::max();
+		}
+
+		if (a == 0) {
+			a = epsilon;
+		}
+		if (b == 0) {
+			b = epsilon;
+		}
+
+		return std::fabs(std::fabs(a - b)/std::min(a,b));
+	}
+	inline double epsilon_difference(double a, double b)
+	{
+		return relative_difference(a,b)/epsilon;
+	}
+
 	// sequence from b to e with increment dx
 	inline std::valarray<double> sequence(double b, double e, double dx)
 	{
@@ -36,14 +60,13 @@ namespace fms {
 		auto Df = difference_quotient(f, h);
 
 		double lhs = Df(x) - df;
-		double rhs = dddf * h * h / 6;
-
-		bool b = std::fabs(lhs) < tol * std::fabs(rhs);
+		dddf = std::max(1., std::fabs(dddf));
+		double rhs = std::fabs(dddf * h * h / 6);
+		double err = std::fabs(lhs) / rhs;
+		
+		bool b = err <= tol;
 		if (!b) {
 			tol = lhs / rhs;
-			if (std::fabs(lhs) < sqrt(epsilon) && std::fabs(rhs) < sqrt(epsilon)) {
-				b = true;
-			}
 		}
 
 		return b;
