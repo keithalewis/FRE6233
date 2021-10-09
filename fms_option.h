@@ -65,6 +65,21 @@ namespace fms {
 			return normal::cdf(t, x, sigma, 1, 0) / (f * sigma);
 		}
 
+		// n-th derivative with respect to f
+		inline double value(double f, double sigma, double k, double t, unsigned n)
+		{
+			if (n == 0) {
+				return value(f, sigma, k, t);
+			}
+			if (n == 1) {
+				return delta(f, sigma, k, t);
+			}
+
+			double x = moneyness(f, sigma, std::fabs(k), t);
+
+			return normal::cdf(t, x, sigma, n - 1, 0) / pow(f * sigma, n - 1);
+		}
+
 		// put (k < 0) or call (k > 0) option vega, dv/ds
 		inline double vega(double f, double sigma, double k, double t)
 		{

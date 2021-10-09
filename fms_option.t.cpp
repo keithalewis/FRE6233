@@ -39,6 +39,21 @@ int fms_option_test()
 
 	return 0;
 }
-int fms_option_test_ = fms_option_test();
+//int fms_option_test_ = fms_option_test();
+
+int fms_option_value_test(double f = 100, double sigma = 0.2, double k = 100, double t = 0.25, unsigned n = 0)
+{
+	auto v = [sigma,k,t,n](double f) { return value(f, sigma, k, t, n); };
+	{
+		for (double h : {0.01, 0.001, 0.0001}) {
+			double dv = value(f, sigma, k, t, n + 1);
+			double dddv = value(f, sigma, k, t, n + 3);
+			assert((derivative_test<double, double>(v, f, h, dv, dddv, 100.)));
+		}
+	}
+
+	return 0;
+}
+int fms_option_value_test_ = fms_option_value_test();
 
 #endif // _DEBUG

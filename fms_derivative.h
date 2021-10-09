@@ -53,20 +53,18 @@ namespace fms {
 		};
 	}
 
-	// (f(x + h) - f(x - h))/2h = f'(x) + f'''(x) h^2/3! + ...
+	// (f(x + h) - f(x - h))/2h = f'(x) + f'''(x) h^2/3! + O(h^3)
 	template<class X, class Y>
-	inline bool derivative_test(const std::function<Y(X)>& f, X x, X h, X df, X dddf, X tol = 1)
+	inline bool derivative_test(const std::function<Y(X)>& f, X x, X h, X df, X dddf, X O = 1)
 	{
 		auto Df = difference_quotient(f, h);
 
 		double lhs = Df(x) - df;
-		dddf = std::max(1., std::fabs(dddf));
-		double rhs = std::fabs(dddf * h * h / 6);
-		double err = std::fabs(lhs) / rhs;
+		double rhs = dddf * h * h / 6;
 		
-		bool b = err <= tol;
+		bool b = std::fabs(lhs - rhs) <= O * h * h * h;
 		if (!b) {
-			tol = lhs / rhs;
+			O = std::fabs(lhs - rhs) / (h * h * h);
 		}
 
 		return b;
