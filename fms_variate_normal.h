@@ -45,28 +45,23 @@ namespace fms::variate {
 			return phi * H(n - 1, x) * ((n & 1) ? 1 : -1);
 		}
 
-		// P_t^sigma(X_t <= x) = N((x - sigma t)/sqrt(t))
-		// D_x^n N = N^{(n)}(...) / (sqrt(t))^n
-		// D_sigma^n N = N^{(n)}(...) * (sqrt(t))^n (-1)^n
-		static double cdf(double t, double x, double sigma, unsigned nx = 0, unsigned nsigma = 0)
+		// P^s(X <= x) = P(X <= x - s) and derivatives
+		static double cdf(double x, double s, unsigned nx = 0, unsigned ns = 0)
 		{
-			double srt = sqrt(t);
-
-			return N(x/srt - sigma * srt, nx + nsigma) 
-				* pow(srt, (int)nsigma - (int)nx) * (nsigma & 1 ? -1 : 1);
+			return N(x - s, nx + ns) * (ns & 1 ? -1 : 1);
 		}
 
-		// kappa(t, sigma) = log E[e^{sigma X_t}] = sigma^2 t/2 and derivativs
-		static double cumulant(double t, double sigma, unsigned n = 0)
+		// kappa(s) = log E[e^{s X] = s^2/2 and derivativs
+		static double cumulant(double s, unsigned n = 0)
 		{
 			if (n == 0) {
-				return sigma * sigma * t/ 2;
+				return s * s / 2;
 			}
 			if (n == 1) {
-				return sigma * t;
+				return s;
 			}
 			if (n == 2) {
-				return t;
+				return 1;
 			}
 
 			return 0;

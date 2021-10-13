@@ -9,28 +9,16 @@
 using namespace fms;
 using namespace fms::option;
 
-int fms_option_test()
+int fms_option_vega_test()
 {
 	for (auto f : sequence(50, 100, 10)) {
-		for (auto sigma : sequence(0.01, 1, 0.01)) {
+		for (auto s : sequence(0.01, 1, 0.01)) {
 			for (auto k : sequence(50, 100, 10)) {
-				for (auto t : sequence(0.1, 2, 0.1)) {
-					auto vf = [sigma, k, t](double f) { return option::value(f, sigma, k, t); };
-					auto vdf = [sigma, k, t](double f) { return option::delta(f, sigma, k, t); };
-					auto vs = [f, k, t](double sigma) { return option::value(f, sigma, k, t); };
-					for (double h : {.001, .0001, .00001}) {
-						{ // test delta
-							double dv = option::delta(f, sigma, k, t);
-							assert((derivative_test<double, double>(vf, f, h, dv, 1., 200.)));
-						}
-						{ // test gamma
-							double dv = option::gamma(f, sigma, k, t);
-							assert((derivative_test<double, double>(vdf, f, h, dv, 1., 120.)));
-						}
-						{ // test vega
-							double dv = option::vega(f, sigma, k, t);
-							assert((derivative_test<double, double>(vs, sigma, h, dv, 1., 100000.)));
-						}
+				auto vs = [f, k](double s) { return option::value(f, s, k); };
+				for (double h : {.001, .0001, .00001}) {
+					{ // test vega
+						double dv = option::vega(f, s, k);
+						assert((derivative_test<double, double>(vs, s, h, dv, 1., 100000.)));
 					}
 				}
 			}
@@ -41,13 +29,13 @@ int fms_option_test()
 }
 //int fms_option_test_ = fms_option_test();
 
-int fms_option_value_test(double f = 100, double sigma = 0.2, double k = 100, double t = 0.25, unsigned n = 0)
+int fms_option_value_test(double f = 100, double s = 0.1, double k = 100, unsigned n = 0)
 {
-	auto v = [sigma,k,t,n](double f) { return value(f, sigma, k, t, n); };
+	auto v = [s,k,n](double f) { return value(f, s, k, n); };
 	{
 		for (double h : {0.01, 0.001, 0.0001}) {
-			double dv = value(f, sigma, k, t, n + 1);
-			double dddv = value(f, sigma, k, t, n + 3);
+			double dv = value(f, s, k, n + 1);
+			double dddv = value(f, s, k, n + 3);
 			assert((derivative_test<double, double>(v, f, h, dv, dddv, 100.)));
 		}
 	}

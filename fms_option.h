@@ -15,26 +15,26 @@ namespace fms {
 	namespace option {
 
 		//  moneyness
-		inline double moneyness(double f, double sigma, double k, double t)
+		inline double moneyness(double f, double s, double k)
 		{
-			if (f <= 0 || sigma <= 0 || k <= 0 || t <= 0) {
+			if (f <= 0 || s <= 0 || k <= 0) {
 				return NaN;
 			}
 
-			return (log(k / f) + normal::cumulant(t, sigma)) / sigma;
+			return (log(k / f) + normal::cumulant(s)) / s;
 		}
 
 		// put (k < 0) or call (k > 0) option value
-		inline double value(double f, double sigma, double k, double t)
+		inline double value(double f, double s, double k)
 		{
 			if (k < 0) { // put
-				double x = moneyness(f, sigma, -k, t);
+				double x = moneyness(f, s, -k);
 
-				return (-k) * normal::cdf(t, x, 0) - f * normal::cdf(t, x, sigma);
+				return (-k) * normal::cdf(x, 0) - f * normal::cdf(x, s);
 			}
 			else if (k > 0) { // call
 				// c = p + f - k
-				return value(f, sigma, -k, t) + f - k;
+				return value(f, s, -k) + f - k;
 			}
 
 			// k = -/+ 0
@@ -42,64 +42,66 @@ namespace fms {
 		}
 
 		// put (k < 0) or call (k > 0) option delta, dv/df
-		inline double delta(double f, double sigma, double k, double t)
+		inline double delta(double f, double s, double k)
 		{
 			if (k < 0) { // put
-				double x = moneyness(f, sigma, -k, t);
+				double x = moneyness(f, s, -k);
 
-				return -normal::cdf(t, x, sigma, 0, 0);
+				return -normal::cdf(x, s, 0, 0);
 			}
 			else if (k > 0) { // call
 				// dc/df = dp/df + 1
-				return delta(f, sigma, -k, t) + 1;
+				return delta(f, s, -k) + 1;
 			}
 
 			return signbit(k) ? 0 : 1;
 		}
 
 		// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
-		inline double gamma(double f, double sigma, double k, double t)
+		inline double gamma(double f, double s, double k)
 		{
-			double x = moneyness(f, sigma, std::fabs(k), t);
+			double x = moneyness(f, s, std::fabs(k));
 
-			return normal::cdf(t, x, sigma, 1, 0) / (f * sigma);
+			return normal::cdf(x, s, 1, 0) / (f * s);
 		}
 
 		// n-th derivative with respect to f
-		inline double value(double f, double sigma, double k, double t, unsigned n)
+		inline double value(double f, double s, double k, unsigned n)
 		{
 			if (n == 0) {
-				return value(f, sigma, k, t);
+				return value(f, s, k);
 			}
 			if (n == 1) {
-				return delta(f, sigma, k, t);
+				return delta(f, s, k);
 			}
 
-			double x = moneyness(f, sigma, std::fabs(k), t);
+			double x = moneyness(f, s, std::fabs(k));
 
-			return normal::cdf(t, x, sigma, n - 1, 0) / pow(f * sigma, n - 1);
+			return normal::cdf(x, s, n - 1, 0) / pow(f * s, n - 1);
 		}
 
 		// put (k < 0) or call (k > 0) option vega, dv/ds
-		inline double vega(double f, double sigma, double k, double t)
+		inline double vega(double f, double s, double k)
 		{
-			double x = moneyness(f, sigma, fabs(k), t);
+			double x = moneyness(f, s, fabs(k));
 
-			return -f * normal::cdf(t, x, sigma, 0, 1);
+			return -f * normal::cdf(x, s, 0, 1);
 		}
 
 		// put (k < 0) or call (k > 0) option theta, -dv/dt
 		inline double theta(double f, double sigma, double k, double t, double dt = 1./250)
 		{
-			double v = value(f, sigma, k, t);
-			double v_ = value(f, sigma, k, t - dt);
+			double s = sigma * sqrt(t);
+			double v = value(f, s, k);
+			s = sigma * sqrt(t - dt);
+			double v_ = value(f, s, k);
 
 			return (v_ - v) / dt;
 		}
 
 		// implied volatility using initial guess, max number of iterations, and tolerance
-		inline double implied(double f, double v, double k, double t,
-			double sigma = 0, unsigned n = 0, double tol = 0)
+		inline double implied(double f, double v, double k,
+			double s = 0, unsigned n = 0, double tol = 0)
 		{
 			// max(k - f,0) >= k - f
 			// max(k - f,0) <= k
@@ -116,8 +118,8 @@ namespace fms {
 				}
 			}
 
-			if (sigma == 0) {
-				sigma = 0.1; // initial vol guess
+			if (s == 0) {
+				s = 0.1; // initial vol guess
 			}
 			if (n == 0) {
 				n = 100; // maximum number of iterations
@@ -126,27 +128,27 @@ namespace fms {
 				tol = sqrt(std::numeric_limits<double>::epsilon()); // absolute tolerance
 			}
 
-			double v_ = value(f, sigma, k, t);
-			double dv_ = vega(f, sigma, k, t); // dv/ds
-			double sigma_ = sigma - (v_ - v) / dv_; // Newton-Raphson
-			if (sigma_ < 0) {
-				sigma_ = sigma / 2;
+			double v_ = value(f, s, k);
+			double dv_ = vega(f, s, k); // dv/ds
+			double s_ = s - (v_ - v) / dv_; // Newton-Raphson
+			if (s_ < 0) {
+				s_ = s / 2;
 			}
-			while (fabs(sigma_ - sigma) > tol) {
-				v_ = value(f, sigma_, k, t);
-				dv_ = vega(f, sigma_, k, t);
-				sigma = sigma_ - (v_ - v) / dv_;
-				if (sigma < 0) {
-					sigma = sigma_ / 2;
+			while (fabs(s_ - s) > tol) {
+				v_ = value(f, s_, k);
+				dv_ = vega(f, s_, k);
+				s = s_ - (v_ - v) / dv_;
+				if (s < 0) {
+					s = s_ / 2;
 				}
-				std::swap(sigma_, sigma);
+				std::swap(s_, s);
 				if (n == 0) {
 					return NaN;
 				}
 				--n;
 			}
 
-			return sigma_;
+			return s_;
 		}
 	}
 
@@ -179,7 +181,7 @@ namespace fms {
 		{
 			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-			return option::moneyness(f, s, fabs(o.k), o.t);
+			return option::moneyness(f, s, fabs(o.k));
 		}
 
 		// call using value(r, S, sigma, put({k, t}))
@@ -187,13 +189,13 @@ namespace fms {
 		{
 			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-			return D * option::value(f, s, -o.k, o.t);
+			return D * option::value(f, s, -o.k);
 		}
 		inline double value(double r, double S, double sigma, call o)
 		{
 			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
 
-			return D * option::value(f, s, o.k, o.t);
+			return D * option::value(f, s, o.k);
 		}
 
 		// delta, ...

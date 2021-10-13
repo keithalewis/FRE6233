@@ -80,20 +80,18 @@ int fms_variant_normal_cdf_test()
 		for (double s : sequence(-1, 1, .1)) {
 			for (int nx : {0, 1, 2, 3}) {
 				for (int ns : {0, 1, 2, 3}) {
-					for (double t : sequence(0.1, 2, .1)) {
-						auto fx = [t, s, nx, ns](double x) { return normal::cdf(t, x, s, nx, ns); };
-						auto fs = [t, x, nx, ns](double s) { return normal::cdf(t, x, s, nx, ns); };
-						for (double h : { .01, .001, .0001, .00001}) {
-							{
-								auto df = normal::cdf(t, x, s, nx + 1, ns);
-								double dddf = normal::cdf(t, x, s, nx + 3, ns);
-								assert((derivative_test<double,double>(fx, x, h, df, dddf, 10.)));
-							}
-							{
-								auto df = normal::cdf(t, x, s, nx, ns + 1);
-								double dddf = normal::cdf(t, x, s, nx, ns + 3);
-								assert((derivative_test<double, double>(fs, s, h, df, dddf, 20.)));
-							}
+					auto fx = [s, nx, ns](double x) { return normal::cdf(x, s, nx, ns); };
+					auto fs = [x, nx, ns](double s) { return normal::cdf(x, s, nx, ns); };
+					for (double h : { .01, .001, .0001, .00001}) {
+						{
+							auto df = normal::cdf(x, s, nx + 1, ns);
+							double dddf = normal::cdf(x, s, nx + 3, ns);
+							assert((derivative_test<double,double>(fx, x, h, df, dddf, 10.)));
+						}
+						{
+							auto df = normal::cdf(x, s, nx, ns + 1);
+							double dddf = normal::cdf(x, s, nx, ns + 3);
+							assert((derivative_test<double, double>(fs, s, h, df, dddf, 20.)));
 						}
 					}
 				}

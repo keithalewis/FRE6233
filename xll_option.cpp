@@ -33,10 +33,10 @@ AddIn xai_option_moneyness(
 Moneyness is \((\log(k/f) + \sigma^2 t/2)/\sigma\).
 )")
 );
-double WINAPI xll_option_moneyness(double f, double s, double k, double t)
+double WINAPI xll_option_moneyness(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::moneyness(f, s, fabs(k), t);
+	return option::moneyness(f, sigma*sqrt(t), fabs(k));
 }
 
 AddIn xai_option_value(
@@ -57,7 +57,7 @@ and \(E[\max\{k - F, 0\}]\) for a put.
 double WINAPI xll_option_value(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::value(f, sigma, k, t);
+	return option::value(f, sigma*sqrt(t), k);
 }
 
 AddIn xai_option_delta(
@@ -77,7 +77,7 @@ Option delta is the derivative of option value with respect to forward.
 double WINAPI xll_option_delta(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::delta(f, sigma, k, t);
+	return option::delta(f, sigma*sqrt(t), k);
 }
 
 AddIn xai_option_gamma(
@@ -97,7 +97,7 @@ Option gamma is the second derivative of option value with respect to forward.
 double WINAPI xll_option_gamma(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::gamma(f, sigma, k, t);
+	return option::gamma(f, sigma * sqrt(t), k);
 }
 
 AddIn xai_option_vega(
@@ -117,7 +117,7 @@ Option vega is the derivative of option value with respect to vol.
 double WINAPI xll_option_vega(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::vega(f, sigma, k, t);
+	return option::vega(f, sigma * sqrt(t), k);
 }
 
 AddIn xai_option_theta(
@@ -165,5 +165,5 @@ Option implied volatility is the inverse of value.
 double WINAPI xll_option_implied(double f, double v, double k, double t, double sigma, unsigned n, double tol)
 {
 #pragma XLLEXPORT
-	return option::implied(f, v, k, t, sigma, n, tol);
+	return option::implied(f, v, k, sigma * sqrt(t), n, tol);
 }
