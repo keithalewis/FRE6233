@@ -101,6 +101,6 @@ int fms_variant_normal_cdf_test()
 
 	return 0;
 }
-int fms_variant_normal_cdf_test_ = fms_variant_normal_cdf_test();
+//int fms_variant_normal_cdf_test_ = fms_variant_normal_cdf_test();
 
 #endif // _DEBUG

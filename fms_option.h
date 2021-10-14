@@ -185,17 +185,18 @@ namespace fms {
 		}
 
 		// call using value(r, S, sigma, put({k, t}))
-		inline double value(double r, double S, double sigma, put o)
+		inline double value(double r, double S, double sigma, int flag, double k, double t)
 		{
-			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			double D = exp(-r * t);
 
-			return D * option::value(f, s, -o.k);
-		}
-		inline double value(double r, double S, double sigma, call o)
-		{
-			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			switch (flag) {
+			case 'P':
+				return D * option::value(S / D, sigma * sqrt(t), -k);
+			case 'C':
+				return D * option::value(S / D, sigma * sqrt(t), k);
+			}
 
-			return D * option::value(f, s, o.k);
+			return std::numeric_limits<double>::quiet_NaN();
 		}
 
 		// delta, ...

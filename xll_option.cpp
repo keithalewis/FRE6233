@@ -42,10 +42,12 @@ double WINAPI xll_option_moneyness(double f, double sigma, double k, double t)
 AddIn xai_option_value(
 	Function(XLL_DOUBLE, "xll_option_value", "OPTION.VALUE")
 	.Arguments({
-		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_CSTRING, "flag", "call/put put."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "r", "is the c.c. interest rate.")
 		})
 	.FunctionHelp("Return the option call (k > 0) or put (k < 0) value.")
 	.Category(CATEGORY)
@@ -54,10 +56,10 @@ Option value is \(E[\max\{F - k, 0\}]\) for a call
 and \(E[\max\{k - F, 0\}]\) for a put.
 )")
 );
-double WINAPI xll_option_value(double f, double sigma, double k, double t)
+double WINAPI xll_option_value(double S, double sigma, PCTSTR flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return option::value(f, sigma*sqrt(t), k);
+		return fms:bsm::value(r, S, sigma, (int)*flag, k, t);
 }
 
 AddIn xai_option_delta(
