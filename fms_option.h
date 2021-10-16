@@ -153,8 +153,8 @@ namespace fms {
 
 		enum contract {
 			PUT = 'P',
-			CALL = 'C',
 			DIGITAL_PUT = 'Q',
+			CALL = 'C',
 			DIGITAL_CALL = 'D',
 		};
 	}
@@ -178,7 +178,7 @@ namespace fms {
 			return option::moneyness(f, s, fabs(k));
 		}
 
-		inline double value(double r, double S, double sigma, int/*option::contract*/ c, double k, double t)
+		inline double value(double r, double S, double sigma, int c, double k, double t)
 		{
 			auto [D, f, s] = Dfs(r, S, sigma, t);
 
@@ -187,6 +187,7 @@ namespace fms {
 				return D * option::value(f, s, -k);
 			case option::contract::CALL:
 				return D * option::value(f, s, k);
+			// case DIGITAL...
 			}
 
 			return std::numeric_limits<double>::quiet_NaN();
