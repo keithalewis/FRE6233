@@ -150,52 +150,46 @@ namespace fms {
 
 			return s_;
 		}
+
+		enum contract {
+			PUT = 'P',
+			CALL = 'C',
+			DIGITAL_PUT = 'Q',
+			DIGITAL_CALL = 'D',
+		};
 	}
 
-	struct contract {
-		double k; // strike
-		double t; // expiration
-	};
-	// different types with the same data
-	struct put : contract {};
-	struct call : contract {};
-	struct digital_put : contract {};
-	struct digital_call : contract {};
-
-	// Black-Scholes/Mertion option value and greeks
 	namespace bsm {
 
 		// Convert B-S/M parameters to Black forward parameters.
-		inline auto Dfsk(double r, double S, double sigma, const contract& o)
+		inline auto Dfs(double r, double S, double sigma, double t)
 		{
-			double D = exp(-r * o.t);
+			double D = exp(-r * t);
 			double f = S / D;
-			double s = sigma * sqrt(o.t);
+			double s = sigma * sqrt(t);
 
-			return std::tuple(D, f, s, o.k);
+			return std::tuple(D, f, s);
 		}
 
-		// call using moneyness(r, S, sigma, contract({k, t}))
-		// or moneyness(r, S, sigma, (contract){.k = k, .t = t})
-		inline double moneyness(double r, double S, double sigma, const contract& o)
+		inline double moneyness(double r, double S, double sigma, double k, double t)
 		{
-			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			auto [D, f, s] = Dfs(r, S, sigma, t);
 
-			return option::moneyness(f, s, fabs(o.k));
+			return option::moneyness(f, s, fabs(k));
 		}
 
-		// call using value(r, S, sigma, put({k, t}))
-		inline double value(double r, double S, double sigma, put o)
+		inline double value(double r, double S, double sigma, int/*option::contract*/ c, double k, double t)
 		{
-			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			auto [D, f, s] = Dfs(r, S, sigma, t);
 
-			return D * option::value(f, s, -o.k);
-		}
-		inline double value(double r, double S, double sigma, call o)
-		{
-			auto [D, f, s, k] = Dfsk(r, S, sigma, o);
+			switch (c) {
+			case option::contract::PUT:
+				return D * option::value(f, s, -k);
+			case option::contract::CALL:
+				return D * option::value(f, s, k);
+			}
 
-			return D * option::value(f, s, o.k);
+			return std::numeric_limits<double>::quiet_NaN();
 		}
 
 		// delta, ...
