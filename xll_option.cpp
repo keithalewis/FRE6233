@@ -68,34 +68,38 @@ double WINAPI xll_option_value(double S, double sigma, option::contract flag, do
 #pragma XLLEXPORT
 	return fms::bsm::value(r, S, sigma, flag, k, t);
 }
-#if 0
+
 AddIn xai_option_delta(
 	Function(XLL_DOUBLE, "xll_option_delta", "OPTION.DELTA")
 	.Arguments({
-		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "r", "is the continuously compouned interest rate. Default is 0."),
 		})
-	.FunctionHelp("Return the option call (k > 0) or put (k < 0) delta.")
+	.FunctionHelp("Return the option call or put delta.")
 	.Category(CATEGORY)
 	.Documentation(R"(
 Option delta is the derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_delta(double f, double sigma, double k, double t)
+double WINAPI xll_option_delta(double S, double sigma, option::contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return option::delta(f, sigma*sqrt(t), k);
+	return fms::bsm::delta(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_gamma(
 	Function(XLL_DOUBLE, "xll_option_gamma", "OPTION.GAMMA")
 	.Arguments({
-		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "r", "is the continuously compouned interest rate. Default is 0."),
 		})
 		.FunctionHelp("Return the option call (k > 0) or put (k < 0) gamma.")
 	.Category(CATEGORY)
@@ -103,19 +107,21 @@ AddIn xai_option_gamma(
 Option gamma is the second derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_gamma(double f, double sigma, double k, double t)
+double WINAPI xll_option_gamma(double S, double sigma, option::contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return option::gamma(f, sigma * sqrt(t), k);
+	return fms::bsm::gamma(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_vega(
 	Function(XLL_DOUBLE, "xll_option_vega", "OPTION.VEGA")
 	.Arguments({
-		Arg(XLL_DOUBLE, "f", "is the forward."),
+		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "r", "is the continuously compouned interest rate. Default is 0."),
 		})
 		.FunctionHelp("Return the option call (k > 0) or put (k < 0) vega.")
 	.Category(CATEGORY)
@@ -123,10 +129,10 @@ AddIn xai_option_vega(
 Option vega is the derivative of option value with respect to vol.
 )")
 );
-double WINAPI xll_option_vega(double f, double sigma, double k, double t)
+double WINAPI xll_option_vega(double S, double sigma, option::contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return option::vega(f, sigma * sqrt(t), k);
+	return fms::bsm::vega(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_theta(
@@ -176,4 +182,3 @@ double WINAPI xll_option_implied(double f, double v, double k, double t, double 
 #pragma XLLEXPORT
 	return option::implied(f, v, k, sigma * sqrt(t), n, tol);
 }
-#endif // 0
