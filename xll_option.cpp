@@ -58,7 +58,7 @@ AddIn xai_option_value(
 	.Documentation(R"(
 Option value is 
 \(e^{-rt}E[\phi(se^{rt + \sigma B_t - \sigma^2t/2})]\)
-where $\phi$ is the option payoff.
+where \(\phi\) is the option payoff.
 Note if \(r = 0\) this gives the Black value where
 \(S\) is the forward.
 )")
