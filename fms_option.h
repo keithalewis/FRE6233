@@ -89,7 +89,7 @@ namespace fms {
 		}
 
 		// put (k < 0) or call (k > 0) option theta, -dv/dt
-		inline double theta(double f, double sigma, double k, double t, double dt = 1./250)
+		inline double theta(double f, double sigma, double k, double t, double dt = 1. / 250)
 		{
 			double s = sigma * sqrt(t);
 			double v = value(f, s, k);
@@ -187,13 +187,58 @@ namespace fms {
 				return D * option::value(f, s, -k);
 			case option::contract::CALL:
 				return D * option::value(f, s, k);
-			// case DIGITAL...
+				// case DIGITAL...
 			}
 
 			return std::numeric_limits<double>::quiet_NaN();
 		}
 
-		// delta, ...
+		// delta
+		inline double delta(double r, double S, double sigma, int c, double k, double t)
+		{
+			auto [D, f, s] = Dfs(r, S, sigma, t);
+
+			switch (c) {
+			case option::contract::PUT:
+				return option::delta(f, s, -k);
+			case option::contract::CALL:
+				return option::delta(f, s, k);
+				// case DIGITAL...
+			}
+
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+		// gamma
+		inline double gamma(double r, double S, double sigma, int c, double k, double t)
+		{
+			auto [D, f, s] = Dfs(r, S, sigma, t);
+
+			switch (c) {
+			case option::contract::PUT:
+				return option::gamma(f, s, -k) / D;
+			case option::contract::CALL:
+				return option::gamma(f, s, k) / D;
+				// case DIGITAL...
+			}
+
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+		// vega
+		inline double vega(double r, double S, double sigma, int c, double k, double t)
+		{
+			auto [D, f, s] = Dfs(r, S, sigma, t);
+
+			switch (c) {
+			case option::contract::PUT:
+				return option::vega(f, s, -k) * D * sqrt(t);
+			case option::contract::CALL:
+				return option::vega(f, s, k) * D * sqrt(t);
+				// case DIGITAL...
+			}
+
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+
 
 	} // namespace bsm
 
