@@ -7,7 +7,7 @@
 #endif
 
 using namespace xll;
-using namespace fms;
+using namespace fms::option;
 
 // Create XML documentation and index.html in `$(TargetPath)` folder.
 // Use `xsltproc file.xml -o file.html` to create HTML documentation.
@@ -37,11 +37,13 @@ Moneyness is \((\log(k/f) + \sigma^2 t/2)/\sigma\).
 double WINAPI xll_option_moneyness(double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return option::moneyness(f, sigma*sqrt(t), fabs(k));
+	return moneyness(f, sigma*sqrt(t), fabs(k));
 }
 
-XLL_CONST(WORD, OPTION_PUT, option::contract::PUT, "European put option", CATEGORY, "");
-XLL_CONST(WORD, OPTION_CALL, option::contract::CALL, "European call option", CATEGORY, "");
+XLL_CONST(WORD, OPTION_PUT, contract::PUT, "European put option", CATEGORY, "");
+XLL_CONST(WORD, OPTION_CALL, contract::CALL, "European call option", CATEGORY, "");
+XLL_CONST(WORD, OPTION_DIGITAL_PUT, contract::DIGITAL_PUT, "European digital put option", CATEGORY, "");
+XLL_CONST(WORD, OPTION_DIGITAL_CALL, contract::DIGITAL_CALL, "European digital call option", CATEGORY, "");
 
 AddIn xai_option_value(
 	Function(XLL_DOUBLE, "xll_option_value", "OPTION.VALUE")
@@ -63,10 +65,10 @@ Note if \(r = 0\) this gives the Black value where
 \(S\) is the forward.
 )")
 );
-double WINAPI xll_option_value(double S, double sigma, option::contract flag, double k, double t, double r)
+double WINAPI xll_option_value(double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return fms::bsm::value(r, S, sigma, flag, k, t);
+	return bsm::value(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_delta(
@@ -85,10 +87,10 @@ AddIn xai_option_delta(
 Option delta is the derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_delta(double S, double sigma, option::contract flag, double k, double t, double r)
+double WINAPI xll_option_delta(double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return fms::bsm::delta(r, S, sigma, flag, k, t);
+	return bsm::delta(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_gamma(
@@ -107,10 +109,10 @@ AddIn xai_option_gamma(
 Option gamma is the second derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_gamma(double S, double sigma, option::contract flag, double k, double t, double r)
+double WINAPI xll_option_gamma(double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return fms::bsm::gamma(r, S, sigma, flag, k, t);
+	return bsm::gamma(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_vega(
@@ -129,10 +131,10 @@ AddIn xai_option_vega(
 Option vega is the derivative of option value with respect to vol.
 )")
 );
-double WINAPI xll_option_vega(double S, double sigma, option::contract flag, double k, double t, double r)
+double WINAPI xll_option_vega(double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return fms::bsm::vega(r, S, sigma, flag, k, t);
+	return bsm::vega(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_theta(
@@ -157,7 +159,7 @@ double WINAPI xll_option_theta(double f, double sigma, double k, double t, doubl
 		dt = 1. / 250;
 	}
 
-	return option::theta(f, sigma, k, t, dt);
+	return black::theta(f, sigma, k, t, dt);
 }
 
 AddIn xai_option_implied(
@@ -180,5 +182,5 @@ Option implied volatility is the inverse of value.
 double WINAPI xll_option_implied(double f, double v, double k, double t, double sigma, unsigned n, double tol)
 {
 #pragma XLLEXPORT
-	return option::implied(f, v, k, sigma * sqrt(t), n, tol);
+	return black::implied(f, v, k, sigma * sqrt(t), n, tol);
 }

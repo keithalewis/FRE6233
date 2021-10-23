@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "fms_option.h"
 #include "fms_derivative.h"
-
+#if 0
 using namespace fms;
 using namespace fms::option;
 
@@ -43,5 +43,5 @@ int fms_option_value_test(double f = 100, double s = 0.1, double k = 100, unsign
 	return 0;
 }
 int fms_option_value_test_ = fms_option_value_test();
-
+#endif // 0
 #endif // _DEBUG
