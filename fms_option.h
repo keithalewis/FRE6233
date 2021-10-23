@@ -190,7 +190,7 @@ namespace fms {
 			// case DIGITAL...
 			}
 
-			return std::numeric_limits<double>::quiet_NaN();
+			return NaN;
 		}
 
 		// delta, ...
