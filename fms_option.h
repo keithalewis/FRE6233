@@ -30,6 +30,7 @@ namespace fms {
 			return (log(k / f) + normal::cumulant(s)) / s;
 		}
 
+		// Use 0 rate and forward values
 		namespace black {
 			// put (k < 0) or call (k > 0) option value
 			inline double value(double f, double s, double k)
@@ -161,6 +162,7 @@ namespace fms {
 
 		namespace digital {
 
+			// q = P(F <= -k), k < 0, or d = P(F > k), k > 0
 			inline double value(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
@@ -175,6 +177,7 @@ namespace fms {
 
 				return signbit(k) ? 0 : 1;
 			}
+			// dq/df or dd/df
 			inline double delta(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
@@ -189,6 +192,7 @@ namespace fms {
 
 				return 0;
 			}
+			// d^2q/df^2 or d^d/df^2
 			inline double gamma(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
@@ -203,6 +207,7 @@ namespace fms {
 
 				return 0;
 			}
+			// dq/ds or dd/ds
 			inline double vega(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
