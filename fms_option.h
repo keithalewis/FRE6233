@@ -192,7 +192,7 @@ namespace fms {
 			inline double gamma(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
-				double v = (normal::cdf(x, 0, 1) - s * normal::cdf(x, 0, 2)) / (f * f* s);
+				double v = (s * normal::cdf(x, 0, 1) + normal::cdf(x, 0, 2))  / (f * f * s * s);
 
 				if (k < 0) {
 					return v;
@@ -206,7 +206,7 @@ namespace fms {
 			inline double vega(double f, double s, double k)
 			{
 				double x = moneyness(f, s, fabs(k));
-				double v = normal::cdf(x, 0, 1) * (s * normal::cumulant(s, 1) - x) / s;
+				double v = normal::cdf(x, 0, 1) * (normal::cumulant(s, 1) - x) / s;
 
 				if (k < 0) {
 					return v;
