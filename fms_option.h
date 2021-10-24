@@ -165,8 +165,7 @@ namespace fms {
 			// q = P(F <= -k), k < 0, or d = P(F > k), k > 0
 			inline double value(double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = normal::cdf(x, 0);
+				double v = 0; //!! calculate v = q
 
 				if (k < 0) {
 					return v;
@@ -180,8 +179,7 @@ namespace fms {
 			// dq/df or dd/df
 			inline double delta(double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = -normal::cdf(x, 0, 1) / (f * s);
+				double v = 0; //!! calculate v = dq/df
 
 				if (k < 0) {
 					return v;
@@ -195,8 +193,7 @@ namespace fms {
 			// d^2q/df^2 or d^d/df^2
 			inline double gamma(double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = (s * normal::cdf(x, 0, 1) + normal::cdf(x, 0, 2))  / (f * f * s * s);
+				double v = 0; //!! calculate v = d^2q/df^2
 
 				if (k < 0) {
 					return v;
@@ -210,8 +207,7 @@ namespace fms {
 			// dq/ds or dd/ds
 			inline double vega(double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = normal::cdf(x, 0, 1) * (normal::cumulant(s, 1) - x) / s;
+				double v = 0; //!! calculate v = dq/ds
 
 				if (k < 0) {
 					return v;
