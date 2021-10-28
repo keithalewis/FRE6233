@@ -69,5 +69,4 @@ namespace fms {
 
 		return b;
 	}
-
 }
