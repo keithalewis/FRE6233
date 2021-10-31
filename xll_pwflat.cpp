@@ -4,6 +4,10 @@
 
 using namespace fms;
 using namespace xll;
+
+#ifdef _DEBUG
+int fms_pwflat_value_test = pwflat::value_test();
+#endif // _DEBUG
 /*
 AddIn xai_pwflat_value(
 	Function(XLL_DOUBLE, "xll_pwflat_value", "PWF.VALUE")
