@@ -41,5 +41,8 @@
     <ClInclude Include="fms_pwflat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fms_binomial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

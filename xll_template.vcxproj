@@ -101,6 +101,7 @@
     <ClCompile Include="xll_pwflat.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fms_binomial.h" />
     <ClInclude Include="fms_derivative.h" />
     <ClInclude Include="fms_pwflat.h" />
     <ClInclude Include="fms_variate_normal.h" />
