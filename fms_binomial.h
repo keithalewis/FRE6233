@@ -9,7 +9,7 @@
 
 namespace fms::binomial {
 
-	// E_k[f(W_n)], f:int -> double
+	// E[f(W_n) | W_n = n - 2k], f:int -> double
 	inline double E(int k, int n, const std::function<double(int)>& f)
 	{
 		if (k == n) {
@@ -20,7 +20,7 @@ namespace fms::binomial {
 	}
 
 	// F = f e^{s W_n/sqrt(n)}/cosh^n(s/sqrt(n))
-	inline double value(double f, double s, double k)
+	inline double value(int n, double f, double s, double k)
 	{
 
 	}
