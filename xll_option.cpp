@@ -1,5 +1,6 @@
 ﻿// xll_option.cpp - Black-Scholes/Merton option value and greeks.
 #include "fms_option.h"
+#include "fms_binomial.h"
 #include "xll/xll/xll.h"
 
 #ifndef CATEGORY
@@ -7,6 +8,7 @@
 #endif
 
 using namespace xll;
+using namespace fms;
 using namespace fms::option;
 
 // Create XML documentation and index.html in `$(TargetPath)` folder.
@@ -53,7 +55,8 @@ AddIn xai_option_value(
 		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
 		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
-		Arg(XLL_DOUBLE, "r", "is the continuously compouned interest rate. Default is 0."),
+		Arg(XLL_DOUBLE, "_r", "is the optional continuously compouned interest rate. Default is 0."),
+		Arg(XLL_LONG, "_n", "is the number of steps for binomial pricing. Default is 0.")
 		})
 	.FunctionHelp("Return the option value.")
 	.Category(CATEGORY)
@@ -63,12 +66,23 @@ Option value is
 where \(\phi\) is the option payoff.
 Note if \(r = 0\) this gives the Black value where
 \(S\) is the forward.
-)")
+If <code>n</code> is not 0 then a binomial model with <code>n</code> steps is used.
+If <code>n &gt; 0</code> then the option is American.
+If <code>n &lt; 0</code> then the option is European.)")
 );
-double WINAPI xll_option_value(double S, double sigma, contract flag, double k, double t, double r)
+double WINAPI xll_option_value(double S, double sigma, contract flag, double k, double t, double r, long n)
 {
 #pragma XLLEXPORT
-	return bsm::value(r, S, sigma, flag, k, t);
+	double v = XLL_NAN;
+
+	if (n != 0) {
+		v = binomial::value(0, 0, abs(n), r, S, sigma, flag, k, t, n > 0);
+	}
+	else {
+		v = bsm::value(r, S, sigma, flag, k, t);
+	}
+
+	return v;
 }
 
 AddIn xai_option_delta(

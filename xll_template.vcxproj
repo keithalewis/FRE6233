@@ -95,6 +95,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="fms_binomial.t.cpp" />
     <ClCompile Include="fms_option.t.cpp" />
     <ClCompile Include="fms_variate_normal.t.cpp" />
     <ClCompile Include="xll_option.cpp" />
