@@ -95,7 +95,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="fms_binomial.t.cpp" />
+    <ClCompile Include="fms_binomial.t.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="fms_option.t.cpp" />
     <ClCompile Include="fms_variate_normal.t.cpp" />
     <ClCompile Include="xll_option.cpp" />
