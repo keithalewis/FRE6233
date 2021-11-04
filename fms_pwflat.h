@@ -20,12 +20,10 @@ namespace fms::pwflat {
 		}
 
 		auto i = std::lower_bound(t, t + n, u);
-		if (i == t + n) {
-			return _f;
-		}
 
-		return f[i - t];
+		return i == t + n ? _f : f[i - t];
 	}
+
 #ifdef _DEBUG
 	inline int value_test()
 	{
@@ -62,4 +60,12 @@ namespace fms::pwflat {
 
 		return f[i - t];
 	}
+
+#ifdef _DEBUG
+	inline int integral_test()
+	{
+		return 0;
+	}
+#endif // _DEBUG
+
 } // namespace fms

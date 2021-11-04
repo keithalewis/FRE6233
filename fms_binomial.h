@@ -30,21 +30,21 @@ namespace fms::binomial {
 	}
 
 	// American put (k < 0) or call (p > 0) value at time j given W_j = i
-	inline double value(int i, int j, int n, double r, double S, double sigma, int pc, double k, double t, bool american = false)
+	inline double value(int i, int j, int n, double f, double s, double k, bool american = false)
 	{
 		std::function<double(double)> nu;
 
-		if (pc == 'P') { // put
-			nu = [k](double F) { return std::max(k - F, 0.); };
+		if (k < 0) { // put
+			nu = [k](double F) { return std::max(-k - F, 0.); };
 		}
-		else if (pc == 'C') { // call
+		else if (k > 0) { // call
 			nu = [k](double F) { return std::max(F - k, 0.); };
 		}
 		else {
 			return std::numeric_limits<double>::quiet_NaN();
 		}
 
-		return value(i, j, n, r, S, sigma, t, nu, american);
+		return value(i, j, n, f, s, nu, american);
 	}
 
 } // namespace fms

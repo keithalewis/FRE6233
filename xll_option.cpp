@@ -76,7 +76,7 @@ double WINAPI xll_option_value(double S, double sigma, contract flag, double k, 
 	double v = XLL_NAN;
 
 	if (n != 0) {
-		v = binomial::value(0, 0, abs(n), r, S, sigma, flag, k, t, n > 0);
+		//v = binomial::value(0, 0, abs(n), r, S, sigma, flag, k, t, n > 0);
 	}
 	else {
 		v = bsm::value(r, S, sigma, flag, k, t);
