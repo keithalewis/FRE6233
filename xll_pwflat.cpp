@@ -19,7 +19,7 @@ AddIn xai_pwflat_curve_(
 		Arg(XLL_FP, "f", "is an array of values."),
 		Arg(XLL_DOUBLE, "_f", "is an optional extrapolated value.")
 		})
-	// .Uncalced()
+	.Uncalced()
 	.Category("")
 	.FunctionHelp("Return the value of a piecewise constant function.")
 );
@@ -31,6 +31,23 @@ HANDLEX WINAPI xll_pwflat_curve_(const _FPX* pt, const _FPX* pf, double _f)
 	return h_.get();
 }
 
+
+AddIn xai_pwflat_curve_value(
+	Function(XLL_DOUBLE, "xll_pwflat_curve_value", "PWF.CURVE.FORWARD")
+	.Arguments({
+		Arg(XLL_HANDLEX, "curve", "is a handle to a curve."),
+		Arg(XLL_DOUBLE, "u", "is the value at which to calculate the forward."),
+		})
+	.Category("")
+	.FunctionHelp("Return the value of a piecewise constant function.")
+);
+double WINAPI xll_pwflat_curve_value(HANDLEX h, double u)
+{
+#pragma XLLEXPORT
+	handle<pwflat::curve<>> h_(h);
+
+	return h_->forward(u);
+}
 
 AddIn xai_pwflat_value(
 	Function(XLL_DOUBLE, "xll_pwflat_value", "PWF.VALUE")
