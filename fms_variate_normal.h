@@ -1,6 +1,7 @@
 // fms_variate_normal.h - Normally distributed random variate
 #pragma once
 #include <cmath>
+#include "fms_variate.h"
 
 namespace fms::variate {
 
@@ -12,7 +13,7 @@ namespace fms::variate {
 #endif
 
 	// standard normal random variate
-	struct normal {
+	struct normal : public fms::variate::base {
 
 		// Hermite polynomials
 		// H_{n+1}(x) = x H_n(x) - n H_{n-1}(x), H_0(x) = 1, H_1(x) = x
@@ -46,13 +47,13 @@ namespace fms::variate {
 		}
 
 		// P^s(X <= x) = P(X <= x - s) and derivatives
-		static double cdf(double x, double s, unsigned nx = 0, unsigned ns = 0)
+		double _cdf(double x, double s, unsigned nx = 0, unsigned ns = 0) const override
 		{
 			return N(x - s, nx + ns) * (ns & 1 ? -1 : 1);
 		}
 
 		// kappa(s) = log E[e^{s X] = s^2/2 and derivativs
-		static double cumulant(double s, unsigned n = 0)
+		double _cumulant(double s, unsigned n = 0) const override
 		{
 			if (n == 0) {
 				return s * s / 2;

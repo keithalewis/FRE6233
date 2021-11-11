@@ -27,6 +27,12 @@
     <ClCompile Include="xll_pwflat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xll_variate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="xll_variate_normal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_option.h">
@@ -42,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fms_binomial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fms_variate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

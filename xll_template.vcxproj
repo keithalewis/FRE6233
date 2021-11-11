@@ -97,13 +97,19 @@
   <ItemGroup>
     <ClCompile Include="fms_option.t.cpp" />
     <ClCompile Include="fms_variate_normal.t.cpp" />
-    <ClCompile Include="xll_option.cpp" />
+    <ClCompile Include="xll_option.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="xll_pwflat.cpp" />
+    <ClCompile Include="xll_variate.cpp" />
+    <ClCompile Include="xll_variate_normal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_binomial.h" />
     <ClInclude Include="fms_derivative.h" />
     <ClInclude Include="fms_pwflat.h" />
+    <ClInclude Include="fms_variate.h" />
     <ClInclude Include="fms_variate_normal.h" />
     <ClInclude Include="fms_option.h" />
   </ItemGroup>

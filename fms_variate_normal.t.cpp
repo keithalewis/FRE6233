@@ -1,5 +1,6 @@
 // fms_variate_normal.t.cpp - Test fms::variate::normal
 // Only test in debug mode
+#if 0
 #ifdef _DEBUG
 #include <cassert>
 #include "fms_variate_normal.h"
@@ -104,3 +105,4 @@ int fms_variant_normal_cdf_test()
 //int fms_variant_normal_cdf_test_ = fms_variant_normal_cdf_test();
 
 #endif // _DEBUG
+#endif // 0

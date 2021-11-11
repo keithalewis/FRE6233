@@ -3,7 +3,7 @@
 #include <cmath>
 #include <limits>
 #include <tuple>
-#include "fms_variate_normal.h"
+#include "fms_variate.h"
 
 using namespace fms::variate;
 
@@ -21,28 +21,28 @@ namespace fms {
 		};
 
 		//  moneyness
-		inline double moneyness(double f, double s, double k)
+		inline double moneyness(const variate::base& v, double f, double s, double k)
 		{
 			if (f <= 0 || s <= 0 || k <= 0) {
 				return NaN;
 			}
 
-			return (log(k / f) + normal::cumulant(s)) / s;
+			return (log(k / f) + v.cumulant(s)) / s;
 		}
 
 		// Use 0 rate and forward values
 		namespace black {
 			// put (k < 0) or call (k > 0) option value
-			inline double value(double f, double s, double k)
+			inline double value(const variate::base& v, double f, double s, double k)
 			{
 				if (k < 0) { // put
-					double x = moneyness(f, s, -k);
+					double x = moneyness(v, f, s, -k);
 
-					return (-k) * normal::cdf(x, 0) - f * normal::cdf(x, s);
+					return (-k) * v.cdf(x, 0) - f * v.cdf(x, s);
 				}
 				else if (k > 0) { // call
 					// c = p + f - k
-					return value(f, s, -k) + f - k;
+					return value(v, f, s, -k) + f - k;
 				}
 
 				// k = -/+ 0
@@ -50,78 +50,78 @@ namespace fms {
 			}
 
 			// put (k < 0) or call (k > 0) option delta, dv/df
-			inline double delta(double f, double s, double k)
+			inline double delta(const variate::base& v, double f, double s, double k)
 			{
 				if (k < 0) { // put
-					double x = moneyness(f, s, -k);
+					double x = moneyness(v, f, s, -k);
 
-					return -normal::cdf(x, s, 0, 0);
+					return -v.cdf(x, s, 0, 0);
 				}
 				else if (k > 0) { // call
 					// dc/df = dp/df + 1
-					return delta(f, s, -k) + 1;
+					return delta(v, f, s, -k) + 1;
 				}
 
 				return signbit(k) ? 0 : 1;
 			}
 
 			// put (k < 0) or call (k > 0) option gamma, d^2v/df^2
-			inline double gamma(double f, double s, double k)
+			inline double gamma(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, std::fabs(k));
+				double x = moneyness(v, f, s, std::fabs(k));
 
-				return normal::cdf(x, s, 1, 0) / (f * s);
+				return v.cdf(x, s, 1, 0) / (f * s);
 			}
 
 			// n-th derivative with respect to f
-			inline double value(double f, double s, double k, unsigned n)
+			inline double value(const variate::base& v, double f, double s, double k, unsigned n)
 			{
 				if (n == 0) {
-					return value(f, s, k);
+					return value(v, f, s, k);
 				}
 				if (n == 1) {
-					return delta(f, s, k);
+					return delta(v, f, s, k);
 				}
 
-				double x = moneyness(f, s, std::fabs(k));
+				double x = moneyness(v, f, s, std::fabs(k));
 
-				return normal::cdf(x, s, n - 1, 0) / pow(f * s, n - 1);
+				return v.cdf(x, s, n - 1, 0) / pow(f * s, n - 1);
 			}
 
 			// put (k < 0) or call (k > 0) option vega, dv/ds
-			inline double vega(double f, double s, double k)
+			inline double vega(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
+				double x = moneyness(v, f, s, fabs(k));
 
-				return -f * normal::cdf(x, s, 0, 1);
+				return -f * v.cdf(x, s, 0, 1);
 			}
 
 			// put (k < 0) or call (k > 0) option theta, -dv/dt
-			inline double theta(double f, double sigma, double k, double t, double dt = 1. / 250)
+			inline double theta(const variate::base& v, double f, double sigma, double k, double t, double dt = 1. / 250)
 			{
 				double s = sigma * sqrt(t);
-				double v = value(f, s, k);
+				double v0 = value(v, f, s, k);
 				s = sigma * sqrt(t - dt);
-				double v_ = value(f, s, k);
+				double v_ = value(v, f, s, k);
 
-				return (v_ - v) / dt;
+				return (v_ - v0) / dt;
 			}
 
 			// implied volatility using initial guess, max number of iterations, and tolerance
-			inline double implied(double f, double v, double k,
+			inline double implied(const variate::base& v, double f, double v0, double k,
 				double s = 0, unsigned n = 0, double tol = 0)
 			{
 				// max(k - f,0) >= k - f
 				// max(k - f,0) <= k
 				if (k < 0) {
-					if (v <= std::max(-k - f, 0.) || v >= k) {
+					if (v0 <= std::max(-k - f, 0.) || v0 >= k) {
 						return NaN;
 					}
 				}
 				// max(f - k,0) >= f - k
 				// max(f - k,0) <= f
 				else if (k > 0) {
-					if (v <= std::max(f - k, 0.) || v >= f) {
+					if (v0 <= std::max(f - k, 0.) || v0 >= f) {
 						return NaN;
 					}
 				}
@@ -136,16 +136,16 @@ namespace fms {
 					tol = sqrt(std::numeric_limits<double>::epsilon()); // absolute tolerance
 				}
 
-				double v_ = value(f, s, k);
-				double dv_ = vega(f, s, k); // dv/ds
-				double s_ = s - (v_ - v) / dv_; // Newton-Raphson
+				double v_ = value(v, f, s, k);
+				double dv_ = vega(v, f, s, k); // dv/ds
+				double s_ = s - (v_ - v0) / dv_; // Newton-Raphson
 				if (s_ < 0) {
 					s_ = s / 2;
 				}
 				while (fabs(s_ - s) > tol) {
-					v_ = value(f, s_, k);
-					dv_ = vega(f, s_, k);
-					s = s_ - (v_ - v) / dv_;
+					v_ = value(v, f, s_, k);
+					dv_ = vega(v, f, s_, k);
+					s = s_ - (v_ - v0) / dv_;
 					if (s < 0) {
 						s = s_ / 2;
 					}
@@ -163,61 +163,61 @@ namespace fms {
 		namespace digital {
 
 			// q = P(F <= -k), k < 0, or d = P(F > k), k > 0
-			inline double value(double f, double s, double k)
+			inline double value(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = normal::cdf(x, 0);
+				double x = moneyness(v, f, s, fabs(k));
+				double v0 = v.cdf(x, 0);
 
 				if (k < 0) {
-					return v;
+					return v0;
 				}
 				else if (k > 0) {
-					return 1 - v;
+					return 1 - v0;
 				}
 
 				return signbit(k) ? 0 : 1;
 			}
 			// dq/df or dd/df
-			inline double delta(double f, double s, double k)
+			inline double delta(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = -normal::cdf(x, 0, 1) / (f * s);
+				double x = moneyness(v, f, s, fabs(k));
+				double v0 = -v.cdf(x, 0, 1) / (f * s);
 
 				if (k < 0) {
-					return v;
+					return v0;
 				}
 				else if (k > 0) {
-					return -v;
+					return -v0;
 				}
 
 				return 0;
 			}
 			// d^2q/df^2 or d^d/df^2
-			inline double gamma(double f, double s, double k)
+			inline double gamma(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = (s * normal::cdf(x, 0, 1) + normal::cdf(x, 0, 2))  / (f * f * s * s);
+				double x = moneyness(v, f, s, fabs(k));
+				double v0 = (s * v.cdf(x, 0, 1) + v.cdf(x, 0, 2))  / (f * f * s * s);
 
 				if (k < 0) {
-					return v;
+					return v0;
 				}
 				else if (k > 0) {
-					return -v;
+					return -v0;
 				}
 
 				return 0;
 			}
 			// dq/ds or dd/ds
-			inline double vega(double f, double s, double k)
+			inline double vega(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(f, s, fabs(k));
-				double v = normal::cdf(x, 0, 1) * (normal::cumulant(s, 1) - x) / s;
+				double x = moneyness(v, f, s, fabs(k));
+				double v0 = v.cdf(x, 0, 1) * (v.cumulant(s, 1) - x) / s;
 
 				if (k < 0) {
-					return v;
+					return v0;
 				}
 				else if (k > 0) {
-					return -v;
+					return -v0;
 				}
 
 				return 0;
@@ -236,81 +236,81 @@ namespace fms {
 				return std::tuple(D, f, s);
 			}
 
-			inline double moneyness(double r, double S, double sigma, double k, double t)
+			inline double moneyness(const variate::base& v, double r, double S, double sigma, double k, double t)
 			{
 				auto [D, f, s] = Dfs(r, S, sigma, t);
 
-				return option::moneyness(f, s, fabs(k));
+				return option::moneyness(v, f, s, fabs(k));
 			}
 
-			inline double value(double r, double S, double sigma, int c, double k, double t)
+			inline double value(const variate::base& v, double r, double S, double sigma, int c, double k, double t)
 			{
 				auto [D, f, s] = Dfs(r, S, sigma, t);
 
 				switch (c) {
 				case option::contract::PUT:
-					return D * black::value(f, s, -k);
+					return D * black::value(v, f, s, -k);
 				case option::contract::CALL:
-					return D * black::value(f, s, k);
+					return D * black::value(v, f, s, k);
 				case option::contract::DIGITAL_PUT:
-					return D * digital::value(f, s, -k);
+					return D * digital::value(v, f, s, -k);
 				case option::contract::DIGITAL_CALL:
-					return D * digital::value(f, s, k);
+					return D * digital::value(v, f, s, k);
 				}
 
 				return NaN;
 			}
 
 			// delta
-			inline double delta(double r, double S, double sigma, int c, double k, double t)
+			inline double delta(const variate::base& v, double r, double S, double sigma, int c, double k, double t)
 			{
 				auto [D, f, s] = Dfs(r, S, sigma, t);
 
 				switch (c) {
 				case option::contract::PUT:
-					return black::delta(f, s, -k);
+					return black::delta(v, f, s, -k);
 				case option::contract::CALL:
-					return black::delta(f, s, k);
+					return black::delta(v, f, s, k);
 				case option::contract::DIGITAL_PUT:
-					return digital::delta(f, s, -k);
+					return digital::delta(v, f, s, -k);
 				case option::contract::DIGITAL_CALL:
-					return digital::delta(f, s, k);
+					return digital::delta(v, f, s, k);
 				}
 
 				return NaN;
 			}
 			// gamma
-			inline double gamma(double r, double S, double sigma, int c, double k, double t)
+			inline double gamma(const variate::base& v, double r, double S, double sigma, int c, double k, double t)
 			{
 				auto [D, f, s] = Dfs(r, S, sigma, t);
 
 				switch (c) {
 				case option::contract::PUT:
-					return black::gamma(f, s, -k) / D;
+					return black::gamma(v, f, s, -k) / D;
 				case option::contract::CALL:
-					return black::gamma(f, s, k) / D;
+					return black::gamma(v, f, s, k) / D;
 				case option::contract::DIGITAL_PUT:
-					return digital::gamma(f, s, -k) / D;
+					return digital::gamma(v, f, s, -k) / D;
 				case option::contract::DIGITAL_CALL:
-					return digital::gamma(f, s, k) / D;
+					return digital::gamma(v, f, s, k) / D;
 				}
 
 				return NaN;
 			}
 			// vega
-			inline double vega(double r, double S, double sigma, int c, double k, double t)
+			inline double vega(const variate::base& v, double r, double S, double sigma, int c, double k, double t)
 			{
 				auto [D, f, s] = Dfs(r, S, sigma, t);
 
 				switch (c) {
 				case option::contract::PUT:
-					return black::vega(f, s, -k) * D * sqrt(t);
+					return black::vega(v, f, s, -k) * D * sqrt(t);
 				case option::contract::CALL:
-					return black::vega(f, s, k) * D * sqrt(t);
+					return black::vega(v, f, s, k) * D * sqrt(t);
 				case option::contract::DIGITAL_PUT:
-					return digital::vega(f, s, -k) * D * sqrt(t);
+					return digital::vega(v, f, s, -k) * D * sqrt(t);
 				case option::contract::DIGITAL_CALL:
-					return digital::vega(f, s, k) * D * sqrt(t);
+					return digital::vega(v, f, s, k) * D * sqrt(t);
 				}
 
 				return NaN;
