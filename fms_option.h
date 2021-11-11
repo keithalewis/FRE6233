@@ -315,6 +315,15 @@ namespace fms {
 
 				return NaN;
 			}
+			
+			// put (k < 0) or call (k > 0) option theta, -dv/dt
+			inline double theta(const variate::base& v, double r, double S, double sigma, int c, double k, double t, double dt = 1. / 250)
+			{
+				double v0 = value(v, r, S, sigma, c, k, t);
+				double v_ = value(v, r, S, sigma, c, k, t - dt);
+
+				return (v_ - v0) / dt;
+			}
 
 		} // namespace bsm
 	}

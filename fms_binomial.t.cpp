@@ -23,9 +23,9 @@ int binomial_test(int n, double f, double s, double k, double tol = 1e-13)
 
 int binomial_tests()
 {
-	binomial_test(10, 0, 100, .2, 100);
-	binomial_test(10, 0, 100, .1, 90);
-	binomial_test(10, 0, 110, .1, 100);
+	binomial_test(10, 100, .2, 100);
+	binomial_test(10, 100, .1, 90);
+	binomial_test(10, 110, .1, 100);
 
 	return 0;
 }

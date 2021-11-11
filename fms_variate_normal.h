@@ -52,7 +52,7 @@ namespace fms::variate {
 			return N(x - s, nx + ns) * (ns & 1 ? -1 : 1);
 		}
 
-		// kappa(s) = log E[e^{s X] = s^2/2 and derivativs
+		// kappa(s) = log E[e^{s X}] = s^2/2 and derivativs
 		double _cumulant(double s, unsigned n = 0) const override
 		{
 			if (n == 0) {

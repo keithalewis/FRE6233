@@ -7,17 +7,18 @@ namespace fms::variate {
 		virtual ~base()
 		{ }
 
-		// P^sigma(X_t <= x) and derivatives wrt x and s
+		// P^s(X <= x) = E[e^{s X - kappa(s)} 1(X <= x)] and derivatives wrt x and s
 		double cdf(double x, double s = 0, unsigned nx = 0, unsigned ns = 0) const
 		{
 			return _cdf(x, s, nx, ns);
 		}
-		// log E[exp(s X)] 
+		// kappa(s) = log E[exp(s X)] 
 		double cumulant(double s, unsigned n = 0) const
 		{
 			return _cumulant(s, n);
 		}
 	private:
+		// overridden in derived class
 		virtual double _cdf(double x, double s, unsigned nx, unsigned ns) const = 0;
 		virtual double _cumulant(double s, unsigned n) const = 0;
 	};

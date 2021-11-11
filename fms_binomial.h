@@ -8,12 +8,15 @@
 
 namespace fms::binomial {
 
-	// F_j = F e^{s V_j/sqrt(n)}/cosh(s/sqrt(n))^n, t_j = tj/n
+	// F_j = F e^{s W_j/sqrt(n)}/cosh(s/sqrt(n))^n
 	// v_j(i) = E_j[nu(F_n) | F_j(i) = S, tau >= t_j]
 	inline double value(int i, int j, int n, double f, double s, 
 		const std::function<double(double)>& nu, bool american = false)
 	{
-		double F_j = f * exp(s * (j - 2. * i)) / pow(cosh(s), j);
+		ensure(n > 0);
+
+		double sn = s / sqrt(n);
+		double F_j = f * exp(sn * (j - 2. * i)) / pow(cosh(sn), j);
 
 		if (j == n) {
 			return nu(F_j);
