@@ -1,4 +1,4 @@
-﻿// xll_option.cpp - Black-Scholes/Merton option value and greeks.
+// xll_option.cpp - Black-Scholes/Merton option value and greeks.
 #include "fms_option.h"
 #include "fms_binomial.h"
 #include "xll/xll/xll.h"
