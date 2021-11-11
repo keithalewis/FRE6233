@@ -25,6 +25,7 @@ Auto<Open> xao_template_docs([]() {
 AddIn xai_option_moneyness(
 	Function(XLL_DOUBLE, "xll_option_moneyness", "OPTION.MONEYNESS")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "f", "is the forward."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
@@ -36,20 +37,23 @@ AddIn xai_option_moneyness(
 Moneyness is \((\log(k/f) + \sigma^2 t/2)/\sigma\).
 )")
 );
-double WINAPI xll_option_moneyness(double f, double sigma, double k, double t)
+double WINAPI xll_option_moneyness(HANDLEX v, double f, double sigma, double k, double t)
 {
 #pragma XLLEXPORT
-	return moneyness(f, sigma*sqrt(t), fabs(k));
+	handle<base> v_(v);
+
+	return moneyness(*v_, f, sigma*sqrt(t), fabs(k));
 }
 
 XLL_CONST(WORD, OPTION_PUT, contract::PUT, "European put option", CATEGORY, "");
 XLL_CONST(WORD, OPTION_CALL, contract::CALL, "European call option", CATEGORY, "");
 XLL_CONST(WORD, OPTION_DIGITAL_PUT, contract::DIGITAL_PUT, "European digital put option", CATEGORY, "");
 XLL_CONST(WORD, OPTION_DIGITAL_CALL, contract::DIGITAL_CALL, "European digital call option", CATEGORY, "");
-
+#if 0
 AddIn xai_option_value(
 	Function(XLL_DOUBLE, "xll_option_value", "OPTION.VALUE")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
@@ -70,24 +74,16 @@ If <code>n</code> is not 0 then a binomial model with <code>n</code> steps is us
 If <code>n &gt; 0</code> then the option is American.
 If <code>n &lt; 0</code> then the option is European.)")
 );
-double WINAPI xll_option_value(double S, double sigma, contract flag, double k, double t, double r, long n)
+double WINAPI xll_option_value(double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	double v = XLL_NAN;
-
-	if (n != 0) {
-		//v = binomial::value(0, 0, abs(n), r, S, sigma, flag, k, t, n > 0);
-	}
-	else {
-		v = bsm::value(r, S, sigma, flag, k, t);
-	}
-
-	return v;
+	return bsm::value(r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_delta(
 	Function(XLL_DOUBLE, "xll_option_delta", "OPTION.DELTA")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
@@ -101,15 +97,18 @@ AddIn xai_option_delta(
 Option delta is the derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_delta(double S, double sigma, contract flag, double k, double t, double r)
+double WINAPI xll_option_delta(HANDLEX v, double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return bsm::delta(r, S, sigma, flag, k, t);
+	handle<base> v_(v);
+
+	return bsm::delta(*v_, r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_gamma(
 	Function(XLL_DOUBLE, "xll_option_gamma", "OPTION.GAMMA")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
@@ -123,15 +122,18 @@ AddIn xai_option_gamma(
 Option gamma is the second derivative of option value with respect to forward.
 )")
 );
-double WINAPI xll_option_gamma(double S, double sigma, contract flag, double k, double t, double r)
+double WINAPI xll_option_gamma(HANDLEX v, double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return bsm::gamma(r, S, sigma, flag, k, t);
+	handle<base> v_(v);
+
+	return bsm::gamma(*v_, r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_vega(
 	Function(XLL_DOUBLE, "xll_option_vega", "OPTION.VEGA")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "S", "is the spot."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
@@ -145,15 +147,18 @@ AddIn xai_option_vega(
 Option vega is the derivative of option value with respect to vol.
 )")
 );
-double WINAPI xll_option_vega(double S, double sigma, contract flag, double k, double t, double r)
+double WINAPI xll_option_vega(HANDLEX v, double S, double sigma, contract flag, double k, double t, double r)
 {
 #pragma XLLEXPORT
-	return bsm::vega(r, S, sigma, flag, k, t);
+	handle<base> v_(v);
+
+	return bsm::vega(*v_, r, S, sigma, flag, k, t);
 }
 
 AddIn xai_option_theta(
 	Function(XLL_DOUBLE, "xll_option_theta", "OPTION.THETA")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "f", "is the forward."),
 		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
@@ -166,19 +171,21 @@ AddIn xai_option_theta(
 Option theta is the derivative of option value with respect to time.
 )")
 );
-double WINAPI xll_option_theta(double f, double sigma, double k, double t, double dt)
+double WINAPI xll_option_theta(HANDLEX v, double f, double sigma, double k, double t, double dt)
 {
 #pragma XLLEXPORT
 	if (dt == 0) {
 		dt = 1. / 250;
 	}
+	handle<base> v_(v);
 
-	return black::theta(f, sigma, k, t, dt);
+	return black::theta(*v_, f, sigma, k, t, dt);
 }
 
 AddIn xai_option_implied(
 	Function(XLL_DOUBLE, "xll_option_implied", "OPTION.IMPLIED")
 	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
 		Arg(XLL_DOUBLE, "f", "is the forward."),
 		Arg(XLL_DOUBLE, "v", "is the option value."),
 		Arg(XLL_DOUBLE, "k", "is the strike."),
@@ -193,8 +200,11 @@ AddIn xai_option_implied(
 Option implied volatility is the inverse of value.
 )")
 );
-double WINAPI xll_option_implied(double f, double v, double k, double t, double sigma, unsigned n, double tol)
+double WINAPI xll_option_implied(HANDLEX v, double f, double v0, double k, double t, double sigma, unsigned n, double tol)
 {
 #pragma XLLEXPORT
-	return black::implied(f, v, k, sigma * sqrt(t), n, tol);
+	handle<base> v_(v);
+
+	return black::implied(*v_, f, v0, k, sigma * sqrt(t), n, tol);
 }
+#endif // 0
