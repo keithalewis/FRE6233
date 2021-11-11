@@ -7,7 +7,11 @@ using namespace xll;
 
 #ifdef _DEBUG
 int fms_pwflat_value_test = pwflat::value_test();
+int fms_pwflat_integral_test = pwflat::integral_test();
+int fms_pwflat_discount_test = pwflat::discount_test();
+int fms_pwflat_spot_test = pwflat::spot_test();
 #endif // _DEBUG
+
 /*
 AddIn xai_pwflat_value(
 	Function(XLL_DOUBLE, "xll_pwflat_value", "PWF.VALUE")
