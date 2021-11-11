@@ -6,7 +6,17 @@
 #include <algorithm>
 #include <limits>
 #include <vector>
-
+/*
+		   { f[i] if t[i-1] < t <= t[i];
+	f(t) = { _f   if t > t[n-1];
+		   { NaN  if t < 0
+	|                                   _f
+	|        f[1]             f[n-1] o--------
+	| f[0] o------          o--------x
+	x------x      ... ------x
+	|
+	0-----t[0]--- ... ---t[n-2]---t[n-1]
+*/
 namespace fms::pwflat {
 
 	template<class X>
@@ -87,7 +97,7 @@ namespace fms::pwflat {
 	template<class T, class F>
 	inline F discount(T u, size_t n, const T* t, const F* f, F _f = NaN<F>)
 	{
-		return 0; // !!!implement
+		return exp(-integral(u, n, t, f, _f));
 	}
 
 #ifdef _DEBUG
@@ -141,21 +151,31 @@ namespace fms::pwflat {
 		~curve()
 		{ }
 
-		curve& extend(T u, F f_)
+		curve& extend(T t_, F f_)
 		{
-			t.push_back(u);
-			t.push_back(f_);
+			// ensure(t_ > t.back());
+			t.push_back(t_);
+			f.push_back(f_);
 
 			return *this;
 		}
 
 		F forward(T u) const
 		{
-			return pwflat::value(u, t.size(), t.data(), f.data(), _f);
+			return value(u, t.size(), t.data(), f.data(), _f);
 		}
-		// F integral(T u) const
-		// F discount(T u) const
-		// F spot(T u) const
+		F integral(T u) const
+		{
+			return integral(u, t.size(), t.data(), f.data(), _f);
+		}
+		F spot(T u) const
+		{
+			return spot(u, t.size(), t.data(), f.data(), _f);
+		}
+		F discount(T u) const
+		{
+			return discount(u, t.size(), t.data(), f.data(), _f);
+		}
 
 #ifdef _DEBUG
 		int test()

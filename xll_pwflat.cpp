@@ -12,7 +12,26 @@ int fms_pwflat_discount_test = pwflat::discount_test();
 int fms_pwflat_spot_test = pwflat::spot_test();
 #endif // _DEBUG
 
-/*
+AddIn xai_pwflat_curve_(
+	Function(XLL_HANDLEX, "xll_pwflat_curve_", "\\PWF.CURVE")
+	.Arguments({
+		Arg(XLL_FP, "t", "is an array of times."),
+		Arg(XLL_FP, "f", "is an array of values."),
+		Arg(XLL_DOUBLE, "_f", "is an optional extrapolated value.")
+		})
+	// .Uncalced()
+	.Category("")
+	.FunctionHelp("Return the value of a piecewise constant function.")
+);
+HANDLEX WINAPI xll_pwflat_curve_(const _FPX* pt, const _FPX* pf, double _f)
+{
+#pragma XLLEXPORT
+	handle<pwflat::curve<>> h_(new pwflat::curve(size(*pt), pt->array, pf->array, _f));
+
+	return h_.get();
+}
+
+
 AddIn xai_pwflat_value(
 	Function(XLL_DOUBLE, "xll_pwflat_value", "PWF.VALUE")
 	.Arguments({
@@ -29,4 +48,3 @@ double WINAPI xll_pwflat_value(double u, const _FPX* pt, const _FPX* pf, double 
 #pragma XLLEXPORT
 	return pwflat::value(u, size(*pt), pt->array, pf->array, _f);
 }
-*/
