@@ -5,6 +5,7 @@
 #endif
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace fms::pwflat {
 
@@ -22,6 +23,7 @@ namespace fms::pwflat {
 			return NaN<F>;
 		}
 
+		// first element in t >= u
 		auto i = std::lower_bound(t, t + n, u);
 
 		return i == t + n ? _f : f[i - t];
@@ -120,19 +122,22 @@ namespace fms::pwflat {
 
 #endif // _DEBUG
 
+	// pwflat forward value type
 	template<class T = double, class F = double>
 	class curve {
 		std::vector<T> t;
 		std::vector<F> f;
 		F _f;
 	public:
-		curve()
+		// default constructable
+		curve(F _f = NaN<F>)
+			: _f(_f)
 		{ }
 		curve(size_t n, const T* t, const F* f, F _f = NaN<F>)
 			: t(t, t + n), f(f, f + n), _f(_f)
 		{ }
 		curve(const curve&) = default;
-		curve& operator(const curve&) = default;
+		curve& operator=(const curve&) = default;
 		~curve()
 		{ }
 
@@ -146,7 +151,7 @@ namespace fms::pwflat {
 
 		F forward(T u) const
 		{
-			return pwflat::forward(u, t.size(), t.data(), f.data(), _f);
+			return pwflat::value(u, t.size(), t.data(), f.data(), _f);
 		}
 		// F integral(T u) const
 		// F discount(T u) const
