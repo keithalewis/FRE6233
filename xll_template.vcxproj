@@ -115,6 +115,7 @@
     <ClInclude Include="fms_variate.h" />
     <ClInclude Include="fms_variate_normal.h" />
     <ClInclude Include="fms_option.h" />
+    <ClInclude Include="fms_variate_triangular.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

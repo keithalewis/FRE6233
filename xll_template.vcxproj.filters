@@ -33,6 +33,9 @@
     <ClCompile Include="xll_variate_normal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fms_binomial.t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_option.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fms_variate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fms_variate_triangular.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
