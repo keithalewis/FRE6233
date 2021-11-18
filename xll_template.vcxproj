@@ -107,6 +107,7 @@
     <ClCompile Include="xll_pwflat.cpp" />
     <ClCompile Include="xll_variate.cpp" />
     <ClCompile Include="xll_variate_normal.cpp" />
+    <ClCompile Include="xll_variate_triangular.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_binomial.h" />

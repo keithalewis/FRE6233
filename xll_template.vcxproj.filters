@@ -36,6 +36,9 @@
     <ClCompile Include="fms_binomial.t.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xll_variate_triangular.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_option.h">

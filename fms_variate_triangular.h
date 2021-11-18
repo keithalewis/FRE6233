@@ -19,7 +19,7 @@ namespace fms::variate {
 		triangular(double l, double m, double h)
 			: l(l), m(m), h(h)
 		{ }
-		// P^s(X <= x) and derivatives
+		// P^s(X <= x) = E[e^{s X - kappa(s)} 1(X <= x)] and derivatives
 		double _cdf(double x, double s, unsigned nx = 0, unsigned ns = 0) const override
 		{
 			x = x; s = s; nx = nx, ns = ns;
@@ -31,14 +31,42 @@ namespace fms::variate {
 			return std::numeric_limits<double>::quiet_NaN();
 		}
 
-		// kappa(s) = log E[e^{s X}] and derivativs
+		// kappa(s) = log E[e^{s X}] and derivatives
+		// E[e^{s X}] =
+		//     int_l^m e^{sx} a(x - l) dx
+		//   + int_m^h e^{sx} b(h - x) dx
+		//
+		// int e^{sx} dx = e^{sx}/s
+		// int x e^{sx} dx = e^{sx}(x/s - 1/s^2)
+		//
+		// E[e^{s X}] =
+		//   [a e^{sx}(x/s - 1/s^2) - al e^{sx}/s]_l^m
+		// + [bh e^{sx}/s - b e^{sx}(x/s - 1/s^2)]_m^h
+		//
+		double mgf(double s) const
+		{
+			double a = 2 / ((m - l) * (h - l));
+			double b = 2 / ((h - m) * (h - l));
+
+			auto I = [s](double x) {
+				return exp(s * x) / s;
+			};
+			auto Ix = [s](double x) {
+				return exp(s * x) * (x / s - 1 / (s * s));
+			};
+
+			double Esx = (a * Ix(m) - a * l * I(m)) - (a * Ix(l) - a * l * I(l));
+			Esx += (b * h * I(h) - b * Ix(h)) - (b * h * I(m) - b * Ix(m));
+
+			return Esx;
+		}
 		double _cumulant(double s, unsigned n = 0) const override
 		{
-			s = s; n = n;
+			if (n != 0) {
+				return std::numeric_limits<double>::quiet_NaN();
+			}
 
-			// !!! implement for n = 0
-
-			return std::numeric_limits<double>::quiet_NaN();
+			return log(mgf(s));
 		}
 	};
 
