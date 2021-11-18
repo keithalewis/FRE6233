@@ -9,7 +9,7 @@ namespace fms {
 
 	inline double relative_difference(double a, double b)
 	{
-		if (a == 0 and b == 0) {
+		if (a == 0 && b == 0) {
 			return 0;
 		}
 
