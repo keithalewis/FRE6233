@@ -57,14 +57,15 @@ namespace fms {
 	template<class X, class Y>
 	inline bool derivative_test(const std::function<Y(X)>& f, X x, X h, X df, X dddf, X O = 1)
 	{
+		dddf = std::max(fabs(dddf), 1.);
 		auto Df = difference_quotient(f, h);
 
 		double lhs = Df(x) - df;
 		double rhs = dddf * h * h / 6;
 		
-		bool b = std::fabs(lhs - rhs) <= O * h * h * h;
+		bool b = fabs(lhs) <= O * rhs;
 		if (!b) {
-			O = std::fabs(lhs - rhs) / (h * h * h);
+			O = fabs(lhs)/fabs(rhs); // set breakpoint to check tolerance
 		}
 
 		return b;

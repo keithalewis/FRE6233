@@ -1,8 +1,8 @@
 // fms_variate_normal.t.cpp - Test fms::variate::normal
 // Only test in debug mode
-#if 0
 #ifdef _DEBUG
 #include <cassert>
+#include <algorithm>
 #include "fms_variate_normal.h"
 #include "fms_derivative.h"
 
@@ -31,8 +31,19 @@ int fms_variant_normal_H_test()
 
 	return 0;
 }
-// force the test to be run when the dll is loaded
+// cause the test to be run when the dll is loaded
 int fms_variant_normal_H_test_ = fms_variant_normal_H_test();
+
+// test N^{(n)} at x
+template<class X = double, class Y = double>
+inline bool normal_derivative_test(int n, X x, X h)
+{
+	Y df = normal::N(x, n + 1);
+	Y dddf = normal::N(x, n + 3);
+	auto f = [n](double x) { return normal::N(x, n);  };
+
+	return derivative_test<X,Y>(f, x, h, df, dddf);
+}
 
 int fms_variant_normal_N_test()
 {
@@ -43,29 +54,12 @@ int fms_variant_normal_N_test()
 		assert(0 == normal::N(0, 2));
 	}
 	{
-		// N'(x)
 		double xs[] = { -1, 0, 1, 2 };
 		double hs[] = { 0.1, 0.01, 0.001, 0.0001 };
-		for (double x : xs) {
-			for (double h : hs) {
-				double df = (normal::N(x + h) - normal::N(x - h)) / (2 * h);
-				assert(fabs(normal::N(x, 1) - df) < h * h);
-			}
-		}
-		// N''(x)
-		for (double x : xs) {
-			for (double h : hs) {
-				double df = (normal::N(x + h, 1) - normal::N(x - h, 1)) / (2 * h);
-				assert(fabs(normal::N(x, 2) - df) < h * h);
-			}
-		}
-		// N^(k)(x)
-		unsigned ks[] = { 2, 3, 4 };
-		for (unsigned k : ks) {
+		for (int n : { 0, 1, 2 }) {
 			for (double x : xs) {
 				for (double h : hs) {
-					double df = (normal::N(x + h, k) - normal::N(x - h, k)) / (2 * h);
-					assert(fabs(normal::N(x, k + 1) - df) < h * h);
+					assert(normal_derivative_test(n, x, h));
 				}
 			}
 		}
@@ -74,6 +68,7 @@ int fms_variant_normal_N_test()
 	return 0;
 }
 int fms_variant_normal_N_test_ = fms_variant_normal_N_test();
+#if 0
 
 int fms_variant_normal_cdf_test()
 {

@@ -39,6 +39,9 @@
     <ClCompile Include="xll_variate_triangular.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xll_FRE6233.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fms_option.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fms_variate_triangular.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xll_FRE6233.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

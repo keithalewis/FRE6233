@@ -1,6 +1,6 @@
 // xll_variate.cpp - Cumulative distribution, derivatives, and cumulant
 #include "fms_variate.h"
-#include "xll/xll/xll.h"
+#include "xll_FRE6233.h"
 
 using namespace xll;
 using namespace fms::variate;
@@ -14,7 +14,7 @@ AddIn xai_variate_cdf(
 		Arg(XLL_WORD, "nx", "is the number of derivatives with respect to x. Default is 0."),
 		Arg(XLL_WORD, "ns", "is the number of derivatives with respect to s. Default is 0."),
 		})
-		.Category("Variate")
+		.Category(CATEGORY)
 	.FunctionHelp("Compute the Esscher transform of the cumulative distribution function.")
 	.Documentation(R"(
 Return the Esscher transform of the cumulative distribution function and its derivatives.
@@ -49,7 +49,7 @@ AddIn xai_variate_cumulant(
 		Arg(XLL_DOUBLE, "s", "is the Esscher parameter."),
 		Arg(XLL_WORD, "ns", "is the number of derivatives with respect to s. Default is 0."),
 		})
-		.Category("Variate")
+		.Category(CATEGORY)
 	.FunctionHelp("Compute the cumulant of a variate.")
 	.Documentation(R"(
 Return the cumulant and derivatives of a variate.

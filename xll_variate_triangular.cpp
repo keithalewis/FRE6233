@@ -1,6 +1,6 @@
 // xll_triangular.cpp - Standard triangular distribution
 #include "fms_variate_triangular.h"
-#include "xll/xll/xll.h"
+#include "xll_FRE6233.h"
 
 using namespace xll;
 using namespace fms::variate;
@@ -13,7 +13,7 @@ AddIn xai_variate_triangular(
 		Arg(XLL_DOUBLE, "h", "is the high."),
 		})
 	.Uncalced()
-	.Category("Variate")
+	.Category(CATEGORY)
 	.FunctionHelp("Return a handle to a standard triangular model.")
 	.Documentation(R"(
 The standard triangular random variate has density 
@@ -23,7 +23,7 @@ The standard triangular random variate has density
 HANDLEX WINAPI xll_variate_triangular(double l, double m, double h)
 {
 #pragma XLLEXPORT
-	handle<base> h(new triangular(l, m, h));
+	handle<base> t(new triangular(l, m, h));
 
-	return h.get();
+	return t.get();
 }

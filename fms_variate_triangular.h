@@ -8,6 +8,7 @@
 // f(x) = 2(h - x)/(h - m)(h - l), m <= x <= h;
 // f(x) = 0, x > h;
 #pragma once
+#include <algorithm>
 #include <limits>
 #include "fms_variate.h"
 
@@ -16,13 +17,51 @@ namespace fms::variate {
 	// triangular distribution
 	struct triangular : public fms::variate::base {
 		double l, m, h;
+		double a, b;
+		
+		static double I(double x, double s) {
+			return exp(s * x) / s;
+		};
+		static double Ix(double x, double s) {
+			return exp(s * x) * (x / s - 1 / (s * s));
+		};
+
 		triangular(double l, double m, double h)
-			: l(l), m(m), h(h)
-		{ }
+			: l(l), m(m), h(h), a(2 / ((m - l) * (h - l))), b(2 / ((h - m) * (h - l)))
+		{
+			// ensure(l < m)
+			// ensure(m < h);
+		}
 		// P^s(X <= x) = E[e^{s X - kappa(s)} 1(X <= x)] and derivatives
+		// cdf(x, s, nx, ns) = int_{-infty^x} e^{s y - kappa(y)} f(y) dy.
 		double _cdf(double x, double s, unsigned nx = 0, unsigned ns = 0) const override
 		{
-			x = x; s = s; nx = nx, ns = ns;
+			double mgfs = mgf(s); // e^{kappa(s)}
+
+			if (nx == 0 && ns == 0) {
+				double Ps = 0;
+				if (l <= x) {
+					double xm = std::min(x, m);
+					Ps = (a * Ix(xm, s) - a * l * I(xm, s)) - (a * Ix(l, s) - a * l * I(l, s));
+					if (m <= x && x <= h) {
+						Ps += (b * h * I(x, s) - b * Ix(x, s)) - (b * h * I(m, s) - b * Ix(m, s));
+					}
+				}
+
+				return Ps / mgfs;
+			}
+			if (nx == 1 && ns == 0) {
+				double ps = 0;
+				if (l <= x && x <= m) {
+					ps = a * (x - l);
+				}
+				else if (m <= x && x <= h) {
+					ps = b * (h - x);
+				}
+				ps *= exp(s * x) / mgfs;
+
+				return ps;
+			}
 
 			//!!! implement for nx = 0, ns = 0
 			//!!! implement for nx = 1, ns = 0
@@ -45,18 +84,13 @@ namespace fms::variate {
 		//
 		double mgf(double s) const
 		{
-			double a = 2 / ((m - l) * (h - l));
-			double b = 2 / ((h - m) * (h - l));
+			if (s == 0) {
+				return 1;
+			}
 
-			auto I = [s](double x) {
-				return exp(s * x) / s;
-			};
-			auto Ix = [s](double x) {
-				return exp(s * x) * (x / s - 1 / (s * s));
-			};
 
-			double Esx = (a * Ix(m) - a * l * I(m)) - (a * Ix(l) - a * l * I(l));
-			Esx += (b * h * I(h) - b * Ix(h)) - (b * h * I(m) - b * Ix(m));
+			double Esx = (a * Ix(m, s) - a * l * I(m, s)) - (a * Ix(l, s) - a * l * I(l, s));
+			Esx += (b * h * I(h, s) - b * Ix(h, s)) - (b * h * I(m, s) - b * Ix(m, s));
 
 			return Esx;
 		}

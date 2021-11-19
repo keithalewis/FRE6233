@@ -66,6 +66,10 @@
     <Link>
       <AdditionalOptions>/WHOLEARCHIVE:xll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -100,6 +104,7 @@
     </ClCompile>
     <ClCompile Include="fms_option.t.cpp" />
     <ClCompile Include="fms_variate_normal.t.cpp" />
+    <ClCompile Include="xll_FRE6233.cpp" />
     <ClCompile Include="xll_option.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -117,6 +122,7 @@
     <ClInclude Include="fms_variate_normal.h" />
     <ClInclude Include="fms_option.h" />
     <ClInclude Include="fms_variate_triangular.h" />
+    <ClInclude Include="xll_FRE6233.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

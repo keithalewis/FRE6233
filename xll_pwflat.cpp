@@ -1,6 +1,6 @@
 // xll_pwflat.cpp - Piecewise constant curves
 #include "fms_pwflat.h"
-#include "xll/xll/xll.h"
+#include "xll_FRE6233.h"
 
 using namespace fms;
 using namespace xll;
@@ -20,7 +20,7 @@ AddIn xai_pwflat_curve_(
 		Arg(XLL_DOUBLE, "_f", "is an optional extrapolated value.")
 		})
 	.Uncalced()
-	.Category("")
+	.Category(CATEGORY)
 	.FunctionHelp("Return the value of a piecewise constant function.")
 );
 HANDLEX WINAPI xll_pwflat_curve_(const _FPX* pt, const _FPX* pf, double _f)
@@ -38,7 +38,7 @@ AddIn xai_pwflat_curve_value(
 		Arg(XLL_HANDLEX, "curve", "is a handle to a curve."),
 		Arg(XLL_DOUBLE, "u", "is the value at which to calculate the forward."),
 		})
-	.Category("")
+	.Category(CATEGORY)
 	.FunctionHelp("Return the value of a piecewise constant function.")
 );
 double WINAPI xll_pwflat_curve_value(HANDLEX h, double u)
@@ -57,7 +57,7 @@ AddIn xai_pwflat_value(
 		Arg(XLL_FP, "f", "is an array of values."),
 		Arg(XLL_DOUBLE, "_f", "is an optional extrapolated value.")
 		})
-	.Category("")
+	.Category(CATEGORY)
 	.FunctionHelp("Return the value of a piecewise constant function.")
 );
 double WINAPI xll_pwflat_value(double u, const _FPX* pt, const _FPX* pf, double _f)

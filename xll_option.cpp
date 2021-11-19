@@ -1,26 +1,12 @@
 // xll_option.cpp - Black-Scholes/Merton option value and greeks.
 #include "fms_option.h"
 #include "fms_binomial.h"
-#include "xll/xll/xll.h"
-
-#ifndef CATEGORY
-#define CATEGORY "FRE6233"
-#endif
+#include "xll_FRE6233.h"
 
 using namespace xll;
 using namespace fms;
 using namespace fms::option;
 
-// Create XML documentation and index.html in `$(TargetPath)` folder.
-// Use `xsltproc file.xml -o file.html` to create HTML documentation.
-#ifdef _DEBUG
-xll_url_set FRE6233("https://keithalewis.github.io/FRE6233/");
-Auto<Open> xao_template_docs([]() {
-
-	return Documentation(CATEGORY, "Documentation for " CATEGORY ".");
-
-});
-#endif // _DEBUG
 
 AddIn xai_option_moneyness(
 	Function(XLL_DOUBLE, "xll_option_moneyness", "OPTION.MONEYNESS")
