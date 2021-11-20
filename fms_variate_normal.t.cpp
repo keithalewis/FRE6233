@@ -1,6 +1,6 @@
 // fms_variate_normal.t.cpp - Test fms::variate::normal
-// Only test in debug mode
 #ifdef _DEBUG
+// Only test in debug mode
 #include <cassert>
 #include <algorithm>
 #include "fms_variate_normal.h"
@@ -9,7 +9,7 @@
 using namespace fms;
 using namespace fms::variate;
 
-int fms_variant_normal_H_test()
+int normal_H_test()
 {
 	double xs[] = { -1, 0, 1, 2 };
 	{
@@ -32,9 +32,9 @@ int fms_variant_normal_H_test()
 	return 0;
 }
 // cause the test to be run when the dll is loaded
-int fms_variant_normal_H_test_ = fms_variant_normal_H_test();
+int normal_H_test_ = normal_H_test();
 
-// test N^{(n)} at x
+// test N^{(n)}(x)
 template<class X = double, class Y = double>
 inline bool normal_derivative_test(int n, X x, X h)
 {
@@ -45,7 +45,7 @@ inline bool normal_derivative_test(int n, X x, X h)
 	return derivative_test<X,Y>(f, x, h, df, dddf);
 }
 
-int fms_variant_normal_N_test()
+int normal_test()
 {
 	{
 		// sanity checks
@@ -67,28 +67,28 @@ int fms_variant_normal_N_test()
 
 	return 0;
 }
-int fms_variant_normal_N_test_ = fms_variant_normal_N_test();
-#if 0
+int normal_test_ = normal_test();
 
-int fms_variant_normal_cdf_test()
+// test d^nx/dx^nx d^ns/ds^ns cdf(x)
+template<class X = double, class Y = double>
+inline bool normal_cdf_derivative_test(int nx, int ns, X x, X h)
 {
-	for (double x : sequence(-2, 2, .1)) {
-		for (double s : sequence(-1, 1, .1)) {
-			for (int nx : {0, 1, 2, 3}) {
-				for (int ns : {0, 1, 2, 3}) {
-					auto fx = [s, nx, ns](double x) { return normal::cdf(x, s, nx, ns); };
-					auto fs = [x, nx, ns](double s) { return normal::cdf(x, s, nx, ns); };
-					for (double h : { .01, .001, .0001, .00001}) {
-						{
-							auto df = normal::cdf(x, s, nx + 1, ns);
-							double dddf = normal::cdf(x, s, nx + 3, ns);
-							assert((derivative_test<double,double>(fx, x, h, df, dddf, 10.)));
-						}
-						{
-							auto df = normal::cdf(x, s, nx, ns + 1);
-							double dddf = normal::cdf(x, s, nx, ns + 3);
-							assert((derivative_test<double, double>(fs, s, h, df, dddf, 20.)));
-						}
+	nx = nx; ns = ns; x = x; h = h;
+	//!!! define f, df, and dddf
+
+	return true; // derivative_test<X, Y>(f, x, h, df, dddf);
+}
+
+int normal_cdf_test()
+{
+	{
+		double xs[] = { -1, 0, 1, 2 };
+		double hs[] = { 0.1, 0.01, 0.001, 0.0001 };
+		for (int nx : { 0, 1, 2 }) {
+			for (int ns : {0, 1, 2}) {
+				for (double x : xs) {
+					for (double h : hs) {
+						assert(normal_cdf_derivative_test(nx, ns, x, h));
 					}
 				}
 			}
@@ -97,7 +97,6 @@ int fms_variant_normal_cdf_test()
 
 	return 0;
 }
-//int fms_variant_normal_cdf_test_ = fms_variant_normal_cdf_test();
+int normal_cdf_test_ = normal_cdf_test();
 
 #endif // _DEBUG
-#endif // 0

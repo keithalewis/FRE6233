@@ -1,47 +1,72 @@
 // fms_variate_normal.t.cpp - Test fms::variate::normal
-// Only test in debug mode
 #ifdef _DEBUG
+// Only test in debug mode
 #include <cassert>
 #include <algorithm>
+#include <random>
 #include "fms_option.h"
+#include "fms_variate_normal.h"
 #include "fms_derivative.h"
-#if 0
+
 using namespace fms;
 using namespace fms::option;
 
-int fms_option_vega_test()
+// s_n = (x_1 + ... + x_n)/n
+// n s_n - (n-1) s_{n-1} = x_n
+// s_n = s_{n-1} + (x_n - s_{n-1})/n
+double monte_carlo_option_value(double f, double s, double k, int n = 10000)
 {
-	for (auto f : sequence(50, 100, 10)) {
-		for (auto s : sequence(0.01, 1, 0.01)) {
-			for (auto k : sequence(50, 100, 10)) {
-				auto vs = [f, k](double s) { return option::value(f, s, k); };
-				for (double h : {.001, .0001, .00001}) {
-					{ // test vega
-						double dv = option::vega(f, s, k);
-						assert((derivative_test<double, double>(vs, s, h, dv, 1., 100000.)));
-					}
-				}
-			}
+	double v = 0;
+	std::default_random_engine dre;
+	std::normal_distribution<double> N;
+
+	if (k < 0) {
+		k = -k;
+		for (int i = 1; i <= n; ++i) {
+			double F = f * exp(s * N(dre) - s * s / 2);
+			v += (std::max(k - F, 0.) - v) / i;
+		}
+	}
+	else {
+		for (int i = 1; i <= n; ++i) {
+			double F = f * exp(s * N(dre) - s * s / 2);
+			v += (std::max(F - k, 0.) - v) / i;
 		}
 	}
 
-	return 0;
+	return v;
 }
-//int fms_option_test_ = fms_option_test();
 
-int fms_option_value_test(double f = 100, double s = 0.1, double k = 100, unsigned n = 0)
+// common to all tests
+variate::normal N;
+double fs[] = { 80, 90, 100, 110, 120 };
+double ks[] = { 80, 90, 100, 110, 120 };
+double ss[] = { .01, .02, .1, .2 };
+int is[] = { 10000 };
+
+int option_value_test()
 {
-	auto v = [s,k,n](double f) { return value(f, s, k, n); };
-	{
-		for (double h : {0.01, 0.001, 0.0001}) {
-			double dv = value(f, s, k, n + 1);
-			double dddv = value(f, s, k, n + 3);
-			assert((derivative_test<double, double>(v, f, h, dv, dddv, 100.)));
-		}
-	}
+	// double sd = 2; // two standard deviations
+	// for fs
+	// for ks
+	// for ss
+	// for is
+	/* !!!add for loops above and fix up below
+	double f = 100, s = 0.1, k = 100;
+	int n = 10000;
+	double v = option::black::value(N, f, s, k);
+	double vn = monte_carlo_option_value(f, s, k, n);
+	double sd = 2;
+	assert(fabs(v - vn) <= v * sd / sqrt(n));
+	*/
 
 	return 0;
 }
-int fms_option_value_test_ = fms_option_value_test();
-#endif // 0
+int option_value_test_ = option_value_test();
+
+int option_delta_test_ = 0;
+int option_gamma_test_ = 0;
+int option_vega_test_ = 0;
+int option_implied_test_ = 0;
+
 #endif // _DEBUG
