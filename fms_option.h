@@ -158,6 +158,22 @@ namespace fms {
 
 				return s_;
 			}
+
+			// Var((k - F)^+) = E[(k - F)^2 1(F <= k)] - E[(k - F) 1(F <= k)]^2
+			// = (k^2 P(F <= k) - 2k E[F 1(F <= k)] + E[F^2 1(F <= k)] 
+			// - (k^2 P(F <= k)^2 - 2k E[F 1(F <= k)] + E[F 1(F <= k)]^2)
+			// = k^2 (P - P^2) + f^2 (P(Fe^{s^2} <= k) - P(Fe^{s^2} <= k))
+			inline double variance(const variate::base& v, double f, double s, double k)
+			{
+				double x = moneyness(v, f, s, std::fabs(k));
+				double P = v.cdf(x, s);
+				double x1 = moneyness(v, f*exp(s*s), s, std::fabs(k));
+				double P1 = v.cdf(x1, s);
+				double x2 = moneyness(v, f*2*s*s, s, std::fabs(k));
+				double P2 = v.cdf(x2, s);
+
+				return k * k * (P - P * P) + f * f * (P2 - P1); // ??? check
+			}
 		}
 
 		namespace digital {
