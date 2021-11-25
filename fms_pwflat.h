@@ -23,8 +23,8 @@ namespace fms::pwflat {
 	inline static constexpr X NaN = std::numeric_limits<X>::quiet_NaN();
 
 	// f(u) = f[i], t[i-1] < u <= t[i], 0 <= i < n
-	// f(u) = NaN, u < 0
 	// f(u) = _f, u > t[n-1]
+	// f(u) = NaN, u < 0
 	template<class T = double, class F = double>
 	inline F value(T u, size_t n, const T* t, const F* f,
 		F _f = NaN<F>)

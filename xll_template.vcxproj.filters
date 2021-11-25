@@ -68,5 +68,8 @@
     <ClInclude Include="xll_FRE6233.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fms_monte_carlo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

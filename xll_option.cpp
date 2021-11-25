@@ -1,12 +1,27 @@
 // xll_option.cpp - Black-Scholes/Merton option value and greeks.
 #include "fms_option.h"
 #include "fms_binomial.h"
+#include "fms_variate_normal.h"
 #include "xll_FRE6233.h"
 
 using namespace xll;
 using namespace fms;
 using namespace fms::option;
 
+static variate::normal N;
+
+// return normal variate if v == 0
+inline variate::base* pv(HANDLEX v)
+{
+	if (!v) {
+		return &N;
+	}
+
+	handle<base> v_(v);
+	ensure(v_);
+
+	return v_.ptr();
+}
 
 AddIn xai_option_moneyness(
 	Function(XLL_DOUBLE, "xll_option_moneyness", "OPTION.MONEYNESS")
@@ -29,10 +44,7 @@ double WINAPI xll_option_moneyness(HANDLEX v, double f, double sigma, double k, 
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
-
-		result = moneyness(*v_, f, sigma * sqrt(t), fabs(k));
+		result = moneyness(*pv(v), f, sigma * sqrt(t), fabs(k));
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -83,10 +95,7 @@ double WINAPI xll_option_value(HANDLEX v, double S, double sigma, contract flag,
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
-
-		result = bsm::value(*v_, r, S, sigma, flag, k, t);
+		result = bsm::value(*pv(v), r, S, sigma, flag, k, t);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -121,10 +130,7 @@ double WINAPI xll_option_delta(HANDLEX v, double S, double sigma, contract flag,
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
-
-	    result = bsm::delta(*v_, r, S, sigma, flag, k, t);
+	    result = bsm::delta(*pv(v), r, S, sigma, flag, k, t);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -159,10 +165,7 @@ double WINAPI xll_option_gamma(HANDLEX v, double S, double sigma, contract flag,
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
-
-	    result = bsm::gamma(*v_, r, S, sigma, flag, k, t);
+	    result = bsm::gamma(*pv(v), r, S, sigma, flag, k, t);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -197,10 +200,7 @@ double WINAPI xll_option_vega(HANDLEX v, double S, double sigma, contract flag, 
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
-
-	    result = bsm::vega(*v_, r, S, sigma, flag, k, t);
+	    result = bsm::vega(*pv(v), r, S, sigma, flag, k, t);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -239,10 +239,8 @@ double WINAPI xll_option_theta(HANDLEX v, double S, double sigma, int flag, doub
 		if (dt == 0) {
 			dt = 1. / 250;
 		}
-		handle<base> v_(v);
-		ensure(v_);
 
-	    result = bsm::theta(*v_, r, S, sigma, flag, k, t, dt);
+	    result = bsm::theta(*pv(v), r, S, sigma, flag, k, t, dt);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -278,10 +276,42 @@ double WINAPI xll_option_implied(HANDLEX v, double f, double v0, double k, doubl
 	double result = XLL_NAN;
 
 	try {
-		handle<base> v_(v);
-		ensure(v_);
+	    result = black::implied(*pv(v), f, v0, k, sigma * sqrt(t), n, tol);
+	}
+	catch (const std::exception& ex) {
+		XLL_ERROR(ex.what());
+	}
+	catch (...) {
+		XLL_ERROR(__FUNCTION__ ": unknown exception");
+	}
 
-	    result = black::implied(*v_, f, v0, k, sigma * sqrt(t), n, tol);
+	return result;
+}
+
+AddIn xai_option_variance(
+	Function(XLL_DOUBLE, "xll_option_variance", "OPTION.VARIANCE")
+	.Arguments({
+		Arg(XLL_HANDLEX, "v", "is a handle to a variate."),
+		Arg(XLL_DOUBLE, "S", "is the spot."),
+		Arg(XLL_DOUBLE, "sigma", "is the volatility."),
+		Arg(XLL_WORD, "option", "is the contract type from OPTION_*."),
+		Arg(XLL_DOUBLE, "k", "is the strike."),
+		Arg(XLL_DOUBLE, "t", "is the time in years to expiration."),
+		Arg(XLL_DOUBLE, "r", "is the continuously compouned interest rate. Default is 0."),
+		})
+		.FunctionHelp("Return the option variance.")
+	.Category(CATEGORY)
+	.Documentation(R"(
+Option variance.
+)")
+);
+double WINAPI xll_option_variance(HANDLEX v, double S, double sigma, contract flag, double k, double t, double r)
+{
+#pragma XLLEXPORT
+	double result = XLL_NAN;
+
+	try {
+		result = bsm::variance(*pv(v), r, S, sigma, flag, k, t);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());

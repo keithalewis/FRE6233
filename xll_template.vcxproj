@@ -117,6 +117,7 @@
   <ItemGroup>
     <ClInclude Include="fms_binomial.h" />
     <ClInclude Include="fms_derivative.h" />
+    <ClInclude Include="fms_monte_carlo.h" />
     <ClInclude Include="fms_pwflat.h" />
     <ClInclude Include="fms_variate.h" />
     <ClInclude Include="fms_variate_normal.h" />

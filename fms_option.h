@@ -30,6 +30,24 @@ namespace fms {
 			return (log(k / f) + v.cumulant(s)) / s;
 		}
 
+		// E[F^n 1(F <= k)] = f^n e^{kappa(ns) - n kappa(s)} P_{ns}(X <= x)
+		inline double partial_moment(const variate::base& v, double f, double s, double k, int n)
+		{
+			double x = moneyness(v, f, s, k);
+
+			if (n == 0) {
+				return v.cdf(x);
+			}
+
+			if (n == 1) {
+				return v.cdf(x, s);
+			}
+
+			double Kn = v.cumulant(n * s) - n * v.cumulant(n);
+
+			return pow(f, n) * exp(Kn) * v.cdf(x, n * s);
+		}
+
 		// Use 0 rate and forward values
 		namespace black {
 			// put (k < 0) or call (k > 0) option value
@@ -160,19 +178,25 @@ namespace fms {
 			}
 
 			// Var((k - F)^+) = E[(k - F)^2 1(F <= k)] - E[(k - F) 1(F <= k)]^2
-			// = (k^2 P(F <= k) - 2k E[F 1(F <= k)] + E[F^2 1(F <= k)] 
-			// - (k^2 P(F <= k)^2 - 2k E[F 1(F <= k)] + E[F 1(F <= k)]^2)
-			// = k^2 (P - P^2) + f^2 (P(Fe^{s^2} <= k) - P(Fe^{s^2} <= k))
 			inline double variance(const variate::base& v, double f, double s, double k)
 			{
-				double x = moneyness(v, f, s, std::fabs(k));
-				double P = v.cdf(x, s);
-				double x1 = moneyness(v, f*exp(s*s), s, std::fabs(k));
-				double P1 = v.cdf(x1, s);
-				double x2 = moneyness(v, f*2*s*s, s, std::fabs(k));
-				double P2 = v.cdf(x2, s);
+				double o = value(v, f, s, k);
+				double P0 = partial_moment(v, f, s, fabs(k), 0);
+				double P1 = partial_moment(v, f, s, fabs(k), 1);
+				double P2 = partial_moment(v, f, s, fabs(k), 2);
 
-				return k * k * (P - P * P) + f * f * (P2 - P1); // ??? check
+				if (k < 0) {
+					return k * k * P0 + 2 * k * f * P1 + f * f * P2 - o * o;
+				}
+				else if (k > 0) {
+					P0 = 1 - P0;
+					P1 = 1 - P1;
+					P2 = 1 - P2;
+
+					return f * f * P2 - 2 * k * f * P1 + k * k * P0 - o * o;
+				}
+
+				return signbit(k) ? 0 : f * f * (exp(v.cumulant(2 * s) - 2 * v.cumulant(s)) - 1);
 			}
 		}
 
@@ -212,7 +236,7 @@ namespace fms {
 			inline double gamma(const variate::base& v, double f, double s, double k)
 			{
 				double x = moneyness(v, f, s, fabs(k));
-				double v0 = (s * v.cdf(x, 0, 1) + v.cdf(x, 0, 2))  / (f * f * s * s);
+				double v0 = (s * v.cdf(x, 0, 1) + v.cdf(x, 0, 2)) / (f * f * s * s);
 
 				if (k < 0) {
 					return v0;
@@ -245,6 +269,9 @@ namespace fms {
 			// Convert B-S/M parameters to Black forward parameters.
 			inline auto Dfs(double r, double S, double sigma, double t)
 			{
+				if (t == 0) {
+					t = 1;
+				}
 				double D = exp(-r * t);
 				double f = S / D;
 				double s = sigma * sqrt(t);
@@ -331,7 +358,7 @@ namespace fms {
 
 				return NaN;
 			}
-			
+
 			// put (k < 0) or call (k > 0) option theta, -dv/dt
 			inline double theta(const variate::base& v, double r, double S, double sigma, int c, double k, double t, double dt = 1. / 250)
 			{
@@ -339,6 +366,20 @@ namespace fms {
 				double v_ = value(v, r, S, sigma, c, k, t - dt);
 
 				return (v_ - v0) / dt;
+			}
+			// variance
+			inline double variance(const variate::base& v, double r, double S, double sigma, int c, double k, double t)
+			{
+				auto [D, f, s] = Dfs(r, S, sigma, t);
+
+				switch (c) {
+				case option::contract::PUT:
+					return D * D * black::variance(v, f, s, -k);
+				case option::contract::CALL:
+					return D * D * black::variance(v, f, s, k);
+				}
+
+				return NaN;
 			}
 
 		} // namespace bsm
