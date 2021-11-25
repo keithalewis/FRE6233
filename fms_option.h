@@ -30,22 +30,23 @@ namespace fms {
 			return (log(k / f) + v.cumulant(s)) / s;
 		}
 
-		// E[F^n 1(F <= k)] = f^n e^{kappa(ns) - n kappa(s)} P_{ns}(X <= x)
+		// E[(F/f)^n 1(F <= k)] = e^{kappa(ns) - n kappa(s)} P_{ns}(X <= x)
+		// E[(F/f)^n 1(F > k)] = e^{kappa(ns) - n kappa(s)} P_{ns}(X > x)
 		inline double partial_moment(const variate::base& v, double f, double s, double k, int n)
 		{
-			double x = moneyness(v, f, s, k);
+			double x = moneyness(v, f, s, fabs(k));
 
 			if (n == 0) {
-				return v.cdf(x);
+				return k < 0 ? v.cdf(x) : 1 - v.cdf(x);
 			}
 
 			if (n == 1) {
-				return v.cdf(x, s);
+				return k < 0 ? v.cdf(x, s) : 1 - v.cdf(x,s);
 			}
 
-			double Kn = v.cumulant(n * s) - n * v.cumulant(n);
+			double Kn = v.cumulant(n * s) - n * v.cumulant(s);
 
-			return pow(f, n) * exp(Kn) * v.cdf(x, n * s);
+			return exp(Kn) * (k < 0 ? v.cdf(x, n * s) : 1 - v.cdf(x, n*s));
 		}
 
 		// Use 0 rate and forward values
@@ -180,20 +181,21 @@ namespace fms {
 			// Var((k - F)^+) = E[(k - F)^2 1(F <= k)] - E[(k - F) 1(F <= k)]^2
 			inline double variance(const variate::base& v, double f, double s, double k)
 			{
-				double o = value(v, f, s, k);
-				double P0 = partial_moment(v, f, s, fabs(k), 0);
-				double P1 = partial_moment(v, f, s, fabs(k), 1);
-				double P2 = partial_moment(v, f, s, fabs(k), 2);
+				double P0 = partial_moment(v, f, s, k, 0);
+				double P1 = partial_moment(v, f, s, k, 1);
+				double P2 = partial_moment(v, f, s, k, 2);
 
 				if (k < 0) {
-					return k * k * P0 + 2 * k * f * P1 + f * f * P2 - o * o;
+					double o = -k * P0 - f * P1;
+					double o2 = k * k * P0 + 2 * k * f * P1 + f * f * P2;
+
+					return o2 - o * o;
 				}
 				else if (k > 0) {
-					P0 = 1 - P0;
-					P1 = 1 - P1;
-					P2 = 1 - P2;
+					double o = f * P1 - k * P0;
+					double o2 = f * f * P2 - 2 * k * f * P1 + k * k * P0;
 
-					return f * f * P2 - 2 * k * f * P1 + k * k * P0 - o * o;
+					return o2 - o * o;
 				}
 
 				return signbit(k) ? 0 : f * f * (exp(v.cumulant(2 * s) - 2 * v.cumulant(s)) - 1);

@@ -51,13 +51,13 @@ int option_value_test()
 	// for ss
 	// for is
 	/* !!!add for loops above and fix up below
-	double var = option::black::variance(f, s, k);
 	double f = 100, s = 0.1, k = 100;
+	double stdev = sqrt(option::black::variance(N, f, s, k));
 	int n = 10000;
 	double v = option::black::value(N, f, s, k);
 	double vn = monte_carlo_option_value(f, s, k, n);
 	double sd = 2;
-	assert(fabs(v - vn) <= var * sd / sqrt(n));
+	assert(fabs(v - vn) <= stdev * sd / sqrt(n));
 	*/
 
 	return 0;
