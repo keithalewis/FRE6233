@@ -12,9 +12,6 @@
 using namespace fms;
 using namespace fms::option;
 
-// s_n = (x_1 + ... + x_n)/n
-// n s_n - (n-1) s_{n-1} = x_n
-// s_n = s_{n-1} + (x_n - s_{n-1})/n
 double monte_carlo_option_value(double f, double s, double k, size_t n = 10000)
 {
 	std::function<double(double)> payoff;
@@ -68,5 +65,6 @@ int option_delta_test_ = 0;
 int option_gamma_test_ = 0;
 int option_vega_test_ = 0;
 int option_implied_test_ = 0;
+int option_variance_test_ = 0;
 
 #endif // _DEBUG
