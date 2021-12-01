@@ -47,15 +47,24 @@ int option_value_test()
 	// for ks !!! test both k and -k
 	// for ss
 	// for is
-	/* !!!add for loops above and fix up below
-	double f = 100, s = 0.1, k = 100;
-	double stdev = sqrt(option::black::variance(N, f, s, k));
-	int n = 10000;
-	double v = option::black::value(N, f, s, k);
-	double vn = monte_carlo_option_value(f, s, k, n);
+	// !!!add for loops above and fix up below
 	double sd = 2;
-	assert(fabs(v - vn) <= stdev * sd / sqrt(n));
-	*/
+
+	for (double f : fs) {
+		for (double k : ks) {
+			for (int k_sign : {1, -1}) {
+				k = k * k_sign;
+				for (double s : ss) {
+					for (double n : is) {
+						double stdev = sqrt(option::black::variance(N, f, s, k));
+						double v = option::black::value(N, f, s, k);
+						double vn = monte_carlo_option_value(f, s, k, n);
+						assert(fabs(v - vn) <= stdev * sd / sqrt(n));
+					}
+				}
+			}
+		}
+	}
 
 	return 0;
 }
