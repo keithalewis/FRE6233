@@ -212,14 +212,14 @@ namespace fms {
 					double o = -k * P0 - f * P1;
 					double o2 = k * k * P0 + 2 * k * f * P1 + f * f * P2;
 					double o3 = -k * k * k * P0 - 3 * k * k * f * P1 - 3 * k * f * f * P2 - f * f * f * P3;
-					double o4 = k * k * k * k * P0 + 4 * k * k * k * f * P1 + 6 * k * k * f * f * P2 + 4  * k * f * f * f * P3 + f * f * f * f * P4
+					double o4 = k * k * k * k * P0 + 4 * k * k * k * f * P1 + 6 * k * k * f * f * P2 + 4  * k * f * f * f * P3 + f * f * f * f * P4;
 					return o4 - 4 * o3 * o + 6 * o2 * o * o - 3 * o * o * o * o;
 				}
 				else if (k > 0) {
 					double o = f * P1 - k * P0;
 					double o2 = f * f * P2 - 2 * k * f * P1 + k * k * P0;
 					double o3 = f * f * f * P3 - 3 * f * f * k * P2  + 3 * f * k * k * P1 - k * k * k * P0;
-					double o4 = f * f * f * f * P4 - 4 * f * f * f * k * P3 + 6 * f * f * k * k * P2 - 4 * f * k * k * k * P1 + k * k * k * k * P0
+					double o4 = f * f * f * f * P4 - 4 * f * f * f * k * P3 + 6 * f * f * k * k * P2 - 4 * f * k * k * k * P1 + k * k * k * k * P0;
 					return o4 - 4 * o3 * o + 6 * o2 * o * o - 3 * o * o * o * o;
 				}
 
