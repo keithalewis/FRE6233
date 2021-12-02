@@ -13,7 +13,7 @@ namespace fms::monte_carlo {
 	{
 		S s = 0;
 
-		for (int m = 1; m <= n; ++m) {
+		for (size_t m = 1; m <= n; ++m) {
 			s += (x() - s) / m;
 		}
 
