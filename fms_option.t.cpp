@@ -65,11 +65,11 @@ int option_value_test()
 }
 
 int option_vega_test() {
-	for(int ifs = 0; ifs < sizeof(fs)/sizeof(*fs); ifs++)
-		for(int iks = 0; iks < sizeof(ks)/sizeof(*ks); iks++)
-			for(int iss = 0; iss < sizeof(ss)/sizeof(*ss); iss++)
-				for (int iis = 0; iis < sizeof(is) / sizeof(*is); iis++) {
-					double f = fs[ifs], s = ss[iss], k = ks[iks];
+	for(int i_fs = 0; i_fs < sizeof(fs)/sizeof(*fs); i_fs++)
+		for(int i_ks = 0; i_ks < sizeof(ks)/sizeof(*ks); i_ks++)
+			for(int i_ss = 0; i_ss < sizeof(ss)/sizeof(*ss); i_ss++)
+				for (int i_is = 0; i_is < sizeof(is) / sizeof(*is); i_is++) {
+					double f = fs[i_fs], s = ss[i_ss], k = ks[i_ks];
 					double stdev = sqrt(option::black::variance(N, f, s, k));
 					int n = 10000;
 					double v = option::black::vega(N, f, s, k);
@@ -77,7 +77,7 @@ int option_vega_test() {
 					double sd = 2;
 					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
 
-					k = -ks[iks];
+					k = -ks[i_ks];
 					stdev = sqrt(option::black::variance(N, f, s, k));
 					n = 10000;
 					v = option::black::vega(N, f, s, k);
