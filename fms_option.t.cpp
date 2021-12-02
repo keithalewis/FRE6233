@@ -65,6 +65,21 @@ double monte_carlo_option_implied(double f, double s, size_t n = 10000)
     return monte_carlo::std(n, p);
 }
 
+double delta_variance(const variate::base& v, double f, double s, double k)
+{
+	if (k < 0) { // put
+		double x = moneyness(v, f, s, -k);
+
+		return exp(s * s) * v.cdf(x, 2 * s) - pow(v.cdf(x, s),2);
+	}
+	else if (k >= 0) { // call
+		double x = moneyness(v, f, s, k);
+
+		return exp(s * s) * v.cdf(x, 2 * s) - pow(v.cdf(x, s), 2);
+	}
+	return signbit(k) ? 0 : f;
+}
+
 // common to all tests
 variate::normal N;
 double fs[] = { 80, 90, 100, 110, 120 };
@@ -99,6 +114,36 @@ int option_value_test()
 
 	return 0;
 }
+
+int option_delta_test()
+{
+	double sd = 2, eps=0.001;
+	int n = 10000;
+	for (auto f: fs)
+	{
+		for (auto k:ks)
+		{
+			for (auto s:ss)
+			{
+				double vn_plus = monte_carlo_option_value(f + eps, s, k, n);
+				double vn_minus = monte_carlo_option_value(f - eps, s, k, n);
+				double vn_delta = (vn_plus - vn_minus) / (2 * eps);
+				double v_delta = option::black::delta(N, f, s, k);
+				double stdev = sqrt(delta_variance(N, f, s, k));
+				assert(fabs(v_delta - vn_delta) <= stdev * sd / sqrt(n));
+
+				vn_plus = monte_carlo_option_value(f + eps, s, -k, n);
+				vn_minus = monte_carlo_option_value(f - eps, s, -k, n);
+				vn_delta = (vn_plus - vn_minus) / (2 * eps);
+				v_delta = option::black::delta(N, f, s, -k);
+				stdev = sqrt(delta_variance(N, f, s, -k));
+				assert(fabs(v_delta - vn_delta) <= stdev * sd / sqrt(n));
+			}
+		}
+	}
+	return 0;
+}
+
 int option_implied_test()
 {
     double sd = 2; // two standard deviations
@@ -131,9 +176,10 @@ int option_implied_test()
 
     return 0;
 }
+
 int option_value_test_ = option_value_test();
 
-int option_delta_test_ = 0;
+int option_delta_test_ = option_delta_test();
 int option_gamma_test_ = 0;
 int option_vega_test_ = 0;
 int option_implied_test_ = option_implied_test();
