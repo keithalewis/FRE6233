@@ -76,6 +76,14 @@ int option_vega_test() {
 					double vn = monte_carlo_option_vega(f, s, k, n);
 					double sd = 2;
 					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
+
+					k = -ks[iks];
+					stdev = sqrt(option::black::variance(N, f, s, k));
+					n = 10000;
+					v = option::black::gamma(N, f, s, k);
+					vn = monte_carlo_option_vega(f, s, k, n);
+					sd = 2;
+					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
 				}
 
 	return 0;
