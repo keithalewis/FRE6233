@@ -94,7 +94,7 @@ int option_value_test_ = option_value_test();
 
 int option_delta_test_ = 0;
 int option_gamma_test_ = 0;
-int option_vega_test_ = 0;
+int option_vega_test_ = option_vega_test();
 int option_implied_test_ = 0;
 int option_variance_test_ = 0;
 
