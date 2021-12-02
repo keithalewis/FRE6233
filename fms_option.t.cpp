@@ -68,7 +68,7 @@ int option_value_test()
 			for (int k_sign : {1, -1}) {
 				k = k * k_sign;
 				for (double s : ss) {
-					for (double n : is) {
+					for (size_t n : is) {
 						double stdev = sqrt(option::black::variance(N, f, s, k));
 						double v = option::black::value(N, f, s, k);
 						double vn = monte_carlo_option_value(f, s, k, n);
