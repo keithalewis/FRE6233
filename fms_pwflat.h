@@ -97,6 +97,7 @@ namespace fms::pwflat {
 		assert(integral(2.5, 3, t, f) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 0.5);
 		assert(integral(3.0, 3, t, f) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 1.0);
 		assert(integral(3.5, 3, t, f, 4.0) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 1.0 + 4.0 * 0.5);
+		
 		return 0;
 	}
 #endif // _DEBUG
@@ -132,7 +133,7 @@ namespace fms::pwflat {
 	}
 #ifdef _DEBUG
 
-	inline int spot_test() 
+	inline int spot_test()
 	{
 		// !!! add tests
 		return 0;
