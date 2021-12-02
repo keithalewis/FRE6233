@@ -19,4 +19,21 @@ namespace fms::monte_carlo {
 
 		return s;
 	}
+
+	//Welford's online algo, compute the var in one pass
+	template<class X, class S = std::invoke_result<X>::type>
+	inline S stddev(size_t n, X& x) 
+	{
+		S s = 0;
+		S avglast = 0;
+		S avg = x();
+		for (unsigned int m = 2; m <= n; ++m) {
+			S temp = x();
+			avglast = avg;
+			avg += (temp - s) / m;
+			s += ((temp - avglast) * (temp - avg) - s) / m;
+		}
+
+		return std::sqrt(s);
+	}
 }
