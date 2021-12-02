@@ -92,7 +92,7 @@ int option_variance_test()
 			else k = -ks[k_num - 5];
 			for (int s_num = 0; s_num < 4; s_num++) {
 				double s = ss[s_num];
-				double stdev = sqrt(option::black::variance(N, f, s, 0));
+				double stdev = sqrt(option::black:moment4(N, f, s, k)- std::pow(option::black::variance(N, f, s, k),2));
 				int n = is[0];
 				double v = option::black::variance(N, f, s, k);
 				double vn = monte_carlo_option_variance(f, s, k, n);
