@@ -40,9 +40,9 @@ inline bool normal_derivative_test(int n, X x, X h)
 {
 	Y df = normal::N(x, n + 1);
 	Y dddf = normal::N(x, n + 3);
-	auto f = [n](double x) { return normal::N(x, n);  };
+	auto f = [n](double x) { return normal::N(x, n); };
 
-	return derivative_test<X,Y>(f, x, h, df, dddf);
+	return derivative_test<X, Y>(f, x, h, df, dddf);
 }
 
 int normal_test()
@@ -73,12 +73,11 @@ int normal_test_ = normal_test();
 template<class X = double, class Y = double>
 inline bool normal_cdf_derivative_test(int nx, int ns, X x, X h)
 {
-	nx = nx; ns = ns; x = x; h = h;
-	//!!! define f, df, and dddf
+	normal N;
 
-	Y df = normal::_cdf(x, h, nx + 1, ns);
-	Y dddf = normal::_cdf(x, h, nx + 3, ns);
-	auto f = [nx, ns](double x, double h) { return normal::_cdf(x, h, nx, ns); };
+	auto f = [&N](double x) { return N.cdf(x); };
+	Y df = N.cdf(x, h, nx + 1, ns);
+	Y dddf = N.cdf(x, h, nx + 3, ns);
 
 	return derivative_test<X, Y>(f, x, h, df, dddf);
 }
