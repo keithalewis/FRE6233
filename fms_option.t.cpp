@@ -133,7 +133,7 @@ int option_variance_test()
 				int n = is[0];
 				double v = option::black::variance(N, f, s, k);
 				double vn = monte_carlo_option_variance(f, s, k, n);
-				double sd = 2;
+				//double sd = 2;
 				assert(fabs(v - vn) <= stdev * sd / sqrt(n));
 
 			}
