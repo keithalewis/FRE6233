@@ -88,7 +88,16 @@ namespace fms::pwflat {
 		// test integral(u, n, t, f) for u = -0.5, 0, 0.5, 1, ..., 3.5
 		// by comparing hand computation.
 		// E.g., assert(integral(0.5, ...) == .1*0.5);
-
+		assert(_isnan(integral(-0.5, 3, t, f)));
+		assert(integral(0.0, 3, t, f) == f[0] * 0.0);
+		assert(integral(0.5, 3, t, f) == f[0] * 0.5);
+		assert(integral(1.0, 3, t, f) == f[0] * 1.0);
+		assert(integral(1.5, 3, t, f) == f[0] * 1.0 + f[1] * 0.5);
+		assert(integral(2.0, 3, t, f) == f[0] * 1.0 + f[1] * 1.0);
+		assert(integral(2.5, 3, t, f) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 0.5);
+		assert(integral(3.0, 3, t, f) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 1.0);
+		assert(integral(3.5, 3, t, f, 4.0) == f[0] * 1.0 + f[1] * 1.0 + f[2] * 1.0 + 4.0 * 0.5);
+		
 		return 0;
 	}
 #endif // _DEBUG
@@ -124,7 +133,7 @@ namespace fms::pwflat {
 	}
 #ifdef _DEBUG
 
-	inline int spot_test() 
+	inline int spot_test()
 	{
 		// !!! add tests
 		return 0;
