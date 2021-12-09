@@ -83,6 +83,10 @@ double monte_carlo_option_variance(double f, double s, double k, size_t n = 1000
 	return monte_carlo::average(n, p) - std::pow(monte_carlo_option_value(f, s, k, n), 2);
 }
 
+double monte_carlo_option_vega(double f, double s, double k, size_t n = 10000) {
+	return (monte_carlo_option_value(f, s + 0.0001, k, n) - monte_carlo_option_value(f, s - 0.0001, k, n)) / 0.0002;
+}
+
 // common to all tests
 variate::normal N;
 double fs[] = { 80, 90, 100, 110, 120 };
@@ -117,6 +121,34 @@ int option_value_test()
 
 	return 0;
 }
+
+int option_vega_test() {
+	for(int i_fs = 0; i_fs < sizeof(fs)/sizeof(*fs); i_fs++)
+		for(int i_ks = 0; i_ks < sizeof(ks)/sizeof(*ks); i_ks++)
+			for(int i_ss = 0; i_ss < sizeof(ss)/sizeof(*ss); i_ss++)
+				for (int i_is = 0; i_is < sizeof(is) / sizeof(*is); i_is++) {
+					double f = fs[i_fs], s = ss[i_ss], k = ks[i_ks];
+					double stdev = sqrt(option::black::variance(N, f, s, k));
+					int n = 10000;
+					double v = option::black::vega(N, f, s, k);
+					double vn = monte_carlo_option_vega(f, s, k, n);
+					double sd = 2;
+					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
+
+					k = -ks[i_ks];
+					stdev = sqrt(option::black::variance(N, f, s, k));
+					n = 10000;
+					v = option::black::vega(N, f, s, k);
+					vn = monte_carlo_option_vega(f, s, k, n);
+					sd = 2;
+					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
+				}
+
+	return 0;
+}
+
+
+int option_value_test_ = option_value_test();
 
 int option_variance_test()
 {
@@ -207,7 +239,7 @@ int option_implied_test()
 int option_value_test_ = option_value_test();
 int option_delta_test_ = option_delta_test();
 int option_gamma_test_ = 0;
-int option_vega_test_ = 0;
+int option_vega_test_ = option_vega_test();
 int option_implied_test_ = 0;
 int option_variance_test_ = option_variance_test();
 
