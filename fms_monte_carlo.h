@@ -1,5 +1,6 @@
 // fms_monte_carlo.h - Monte Carlo simulation
 #pragma once
+#include <cmath>
 #include <type_traits>
 
 namespace fms::monte_carlo {

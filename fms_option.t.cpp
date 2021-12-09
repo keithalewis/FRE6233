@@ -33,20 +33,6 @@ double monte_carlo_option_value(double f, double s, double k, size_t n = 10000)
 	return monte_carlo::average(n, p);
 }
 
-double monte_carlo_option_implied(double f, double s, size_t n = 10000)
-{
-
-	std::default_random_engine dre;
-	std::normal_distribution<double> X;
-	auto p = [f, s, &X, &dre]() {
-		double F = f * exp(s * X(dre) - s * s / 2);
-
-		return F;
-	};
-
-	return monte_carlo::stddev(n, p);
-}
-
 double delta_variance(const variate::base& v, double f, double s, double k)
 {
 	if (k < 0) { // put
@@ -242,9 +228,8 @@ int option_implied_test()
 			{
 				auto v = option::black::value(N, f, s, k);
 				auto s0 = option::black::implied(N, f, v, k, s);
-				auto v0 = option::black::value(N, f, s0, k);
-
-				assert(fabs(v - v0) <= s*sqrt(eps));
+	
+				assert(fabs(s - s0) <= s*sqrt(eps));
 			}
 		}
 	}
