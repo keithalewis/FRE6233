@@ -128,7 +128,7 @@ int option_value_test()
 
 int option_gamma_test()
 {
-	for (int ifs = 0; ifs < 5; ifs++) 
+	for (int ifs = 0; ifs < 5; ifs++)
 		for (int iks = 0; iks < 5; iks++)
 			for (int iss = 0; iss < 4; iss++)
 				for (int iis = 0; iis < 10000; iis++) {
@@ -148,7 +148,9 @@ int option_gamma_test()
 					sd = 2;
 					assert(fabs(v - vn) <= stdev * sd / sqrt(n));
 				}
-		
+	return 0;
+}
+
 int option_vega_test() {
 	for(int i_fs = 0; i_fs < sizeof(fs)/sizeof(*fs); i_fs++)
 		for(int i_ks = 0; i_ks < sizeof(ks)/sizeof(*ks); i_ks++)
