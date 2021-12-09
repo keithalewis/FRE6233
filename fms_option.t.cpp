@@ -147,9 +147,6 @@ int option_vega_test() {
 	return 0;
 }
 
-
-int option_value_test_ = option_value_test();
-
 int option_variance_test()
 {
 	double sd = 2; // two standard deviations
